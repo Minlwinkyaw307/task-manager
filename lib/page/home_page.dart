@@ -65,6 +65,9 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               ValueIndicator(),
+                              SizedBox(
+                                height: 10,
+                              ),
                               ValueIndicator(),
                             ],
                           ),
