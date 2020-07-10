@@ -6,6 +6,7 @@ import 'package:task_manager/widget/task_card_view_widget.dart';
 import 'package:task_manager/widget/value_indicator.dart';
 
 class HomePage extends StatefulWidget {
+  static const ROUTE_NAME = '/';
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -23,6 +24,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+
+          },
+          child: Icon(
+            Icons.add
+          ),
+        ),
           body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -53,16 +62,13 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Expanded(
-                          flex: 5,
-                          child: PieChartWidget(),
-                        ),
+                        PieChartWidget(),
                         Expanded(
                           flex: 4,
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               ValueIndicator(),
                               SizedBox(

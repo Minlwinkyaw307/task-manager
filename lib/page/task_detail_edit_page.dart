@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:task_manager/util/global_data.dart';
 
 class TaskDetailEdit extends StatefulWidget {
+  static const ROUTE_NAME = '/taskDetail/new_edit';
+
   @override
   _TaskDetailEditState createState() => _TaskDetailEditState();
 }
@@ -15,6 +17,16 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
   TimeOfDay _taskEndTime = TimeOfDay.now().replacing(
     hour: TimeOfDay.now().hour + 1,
   );
+
+  var _nameController = TextEditingController();
+  final FocusNode _nameFocus = FocusNode();
+  bool _isNameValid = true;
+
+  var _descriptionController = TextEditingController();
+  final FocusNode _descriptionFocus = FocusNode();
+  bool _isDescriptionValid = true;
+
+  bool isCreatingNewTask = false;
 
   Widget _customAppBar() {
     return Container(
@@ -60,7 +72,12 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     );
   }
 
-  Widget _inputTextField() {
+  Widget _inputTextField({
+    @required TextEditingController controller,
+    @required FocusNode focusNode,
+    @required Function validation,
+    @required bool validCheck,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: 3,
@@ -68,12 +85,16 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
       ),
       decoration: BoxDecoration(
         color: INPUT_BG_COLOR,
-        border: Border.all(color: Colors.transparent, width: 1),
+        border: Border.all(
+            color: validCheck ? Colors.transparent : Colors.red, width: 1),
       ),
       child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
         textInputAction: TextInputAction.next,
-        keyboardType: TextInputType.emailAddress,
-        onFieldSubmitted: (value) {},
+        keyboardType: TextInputType.text,
+        onFieldSubmitted: (value) => validation(
+            value: value, validCheck: validCheck, focusNode: focusNode),
         style: TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w500,
@@ -85,7 +106,27 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     );
   }
 
-  Widget _textArea() {
+  bool _inputValidation({
+    @required String value,
+    @required bool validCheck,
+    FocusNode focusNode,
+  }) {
+    setState(() {
+      if (value.length == 0 || value.replaceAll(' ', '').length == 0)
+        validCheck = false;
+      else {
+        validCheck = true;
+        if (focusNode != null) FocusScope.of(context).requestFocus(focusNode);
+      }
+    });
+    return validCheck;
+  }
+
+  Widget _textArea({
+    @required TextEditingController controller,
+    @required FocusNode focusNode,
+    @required bool validCheck,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: 5,
@@ -93,12 +134,12 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
       ),
       decoration: BoxDecoration(
         color: INPUT_BG_COLOR,
-        border:
-            Border.all(color: true ? Colors.transparent : Colors.red, width: 1),
+        border: Border.all(
+            color: validCheck ? Colors.transparent : Colors.red, width: 1),
       ),
       child: TextField(
-//                      controller: _contentController,
-//                      focusNode: _contentFocus,
+        controller: controller,
+        focusNode: focusNode,
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
         maxLines: 3,
@@ -162,6 +203,14 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     );
   }
 
+  Widget _divider() {
+    return Divider(
+      color: const Color.fromRGBO(0, 0, 0, 0.1),
+      thickness: 0.5,
+      height: 0,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateFormat = new DateFormat('dd MMMM yyyy');
@@ -192,23 +241,74 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
+                                !isCreatingNewTask
+                                    ? Expanded(
+                                        child: InkWell(
+                                          onTap: () {},
+                                          child: Container(
+                                            child: Text(
+                                              "Delete",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: CANCELED_COLOR,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: CANCELED_COLOR,
+                                                width: 2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              color: Colors.transparent,
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
+                                !isCreatingNewTask
+                                    ? SizedBox(
+                                        width: 5,
+                                      )
+                                    : Container(),
                                 Expanded(
                                   child: InkWell(
-                                    onTap: () {},
+                                    onTap: () {
+                                      if (isCreatingNewTask) {
+                                        if (_inputValidation(
+                                                value: _nameController.text,
+                                                validCheck: _isNameValid) &&
+                                            _inputValidation(
+                                                value:
+                                                    _descriptionController.text,
+                                                validCheck:
+                                                    _isDescriptionValid)) {
+                                          //Save Data
+                                        }
+                                      }
+                                    },
                                     child: Container(
-                                      child: Text("Delete", style: TextStyle(
-                                        fontSize: 16,
-                                        color: CANCELED_COLOR,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      child: Text(
+                                        isCreatingNewTask ? "Save" : "Update",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                         textAlign: TextAlign.center,
                                       ),
                                       decoration: BoxDecoration(
                                         border: Border.all(
-                                          color: CANCELED_COLOR,
+                                          color: Colors.blue,
                                           width: 2,
                                         ),
-                                        borderRadius: BorderRadius.circular(0)
+                                        borderRadius: BorderRadius.circular(0),
+                                        color: Colors.blue,
                                       ),
                                       padding: EdgeInsets.symmetric(
                                         vertical: 15,
@@ -216,35 +316,6 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 5,),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {},
-                                    child: Container(
-                                      child: Text("Save", style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: DONE_COLOR,
-                                            width: 2,
-                                          ),
-                                          borderRadius: BorderRadius.circular(0),
-                                        color: DONE_COLOR,
-
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 15,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-
                               ],
                             ),
                           ),
@@ -271,7 +342,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                               child: Text(
                                 "Add Task",
                                 style: TextStyle(
-                                  fontSize: 28,
+                                  fontSize: 35,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -311,7 +382,11 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                       ),
                                     ),
                                   ),
-                                  _inputTextField(),
+                                  _inputTextField(
+                                      controller: _nameController,
+                                      focusNode: _nameFocus,
+                                      validation: _inputValidation,
+                                      validCheck: _isNameValid),
                                   SizedBox(
                                     height: 10,
                                   ),
@@ -338,7 +413,11 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                       ],
                                     ),
                                   ),
-                                  _textArea(),
+                                  _textArea(
+                                    validCheck: _isDescriptionValid,
+                                    focusNode: _descriptionFocus,
+                                    controller: _descriptionController,
+                                  ),
                                   SizedBox(
                                     height: 20,
                                   ),
@@ -370,73 +449,96 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                       children: <Widget>[
                                         _detailListTile(
                                           'Start Date',
-                                          _taskStartDate != null ? dateFormat.format(_taskStartDate) : dateFormat.format(DateTime.now()),
+                                          _taskStartDate != null
+                                              ? dateFormat
+                                                  .format(_taskStartDate)
+                                              : dateFormat
+                                                  .format(DateTime.now()),
                                           () {
                                             showDatePicker(
                                                     context: context,
-                                                    initialDate: _taskStartDate != null ? _taskStartDate : DateTime.now(),
+                                                    initialDate:
+                                                        _taskStartDate != null
+                                                            ? _taskStartDate
+                                                            : DateTime.now(),
                                                     firstDate: DateTime.now(),
                                                     lastDate: DateTime(3000))
                                                 .then((date) {
                                               setState(() {
-                                                if(date != null)
+                                                if (date != null)
                                                   this._taskStartDate = date;
                                               });
                                             });
                                           },
                                         ),
-                                        Divider(
-                                          color: const Color.fromRGBO(
-                                              0, 0, 0, 0.1),
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
+                                        _divider(),
                                         _detailListTile(
                                           'Start Time',
-                                          _taskStartTime == null ? "Not Setted" : _taskStartTime.format(context),
-                                              () {
-                                                showTimePicker(context: context, initialTime: _taskStartTime == null ? TimeOfDay.now() : _taskStartTime).then((time){
-                                                  setState(() {
-                                                    if(time != null) this._taskStartTime = time;
-                                                  });
-                                                });
-                                              },
-                                        ),
-                                        Divider(
-                                          color: const Color.fromRGBO(
-                                              0, 0, 0, 0.1),
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                        _detailListTile(
-                                          'End Date',
-                                          _taskEndDate != null ? dateFormat.format(_taskEndDate) : dateFormat.format(DateTime.now().add(Duration(days: 1))),
-                                              () {
-                                            showDatePicker(
-                                                context: context,
-                                                initialDate: _taskEndDate != null ? _taskEndDate : DateTime.now(),
-                                                firstDate: DateTime.now(),
-                                                lastDate: DateTime(3000))
-                                                .then((date) {
+                                          _taskStartTime == null
+                                              ? "Not Setted"
+                                              : _taskStartTime.format(context),
+                                          () {
+                                            showTimePicker(
+                                                    context: context,
+                                                    initialTime:
+                                                        _taskStartTime == null
+                                                            ? TimeOfDay.now()
+                                                            : _taskStartTime)
+                                                .then((time) {
                                               setState(() {
-                                                if(date != null) this._taskStartDate = date;
+                                                if (time != null)
+                                                  this._taskStartTime = time;
                                               });
                                             });
                                           },
                                         ),
-                                        Divider(
-                                          color: const Color.fromRGBO(
-                                              0, 0, 0, 0.1),
-                                          thickness: 0.5,
-                                          height: 0,
+                                        _divider(),
+                                        _detailListTile(
+                                          'End Date',
+                                          _taskEndDate != null
+                                              ? dateFormat.format(_taskEndDate)
+                                              : dateFormat.format(DateTime.now()
+                                                  .add(Duration(days: 1))),
+                                          () {
+                                            showDatePicker(
+                                                    context: context,
+                                                    initialDate:
+                                                        _taskEndDate != null
+                                                            ? _taskEndDate
+                                                            : DateTime.now(),
+                                                    firstDate: DateTime.now(),
+                                                    lastDate: DateTime(3000))
+                                                .then((date) {
+                                              setState(() {
+                                                if (date != null)
+                                                  this._taskEndDate = date;
+                                              });
+                                            });
+                                          },
                                         ),
+                                        _divider(),
                                         _detailListTile(
                                           'End Time',
-                                          _taskEndTime == null ? "Not Setted" : _taskEndTime.format(context),
-                                              () {
-                                            showTimePicker(context: context, initialTime: _taskEndTime == null ? TimeOfDay.now() : _taskEndTime).then((time){
+                                          _taskEndTime == null
+                                              ? "Not Setted"
+                                              : _taskEndTime.format(context),
+                                          () {
+                                            showTimePicker(
+                                                    context: context,
+                                                    initialTime:
+                                                        _taskEndTime == null
+                                                            ? TimeOfDay.now()
+                                                            : _taskEndTime)
+                                                .then((time) {
                                               setState(() {
-                                                if(time != null) this._taskEndTime = time;
+                                                if (time != null) {
+                                                  if(_taskStartDate.compareTo(_taskEndDate) == 0 && (time.hour * 60 + time.minute) < (_taskStartTime.hour * 60 + _taskStartDate.minute)){
+                                                    _taskEndTime = TimeOfDay.now().replacing(
+                                                      hour: TimeOfDay.now().hour + 1,
+                                                    );
+                                                  }
+                                                  else this._taskEndTime = time;
+                                                }
                                               });
                                             });
                                           },

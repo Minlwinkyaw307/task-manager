@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import '../util/global_data.dart';
 
 class PieChartWidget extends StatefulWidget {
-  final double normal = 60;
-  final double onPressed = 70;
+  final double normal = 65;
+  final double onPressed = 75;
+  final double centerRadius = 10;
   PieChartWidget();
 
   @override
@@ -18,7 +19,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: widget.onPressed * 2.75 ,
+      width: widget.onPressed * 2 +  widget.centerRadius * 2,
       child: PieChart(
         PieChartData(
           pieTouchData: PieTouchData(touchCallback: (pieTouchResponse) {
@@ -36,7 +37,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
           ),
           startDegreeOffset: 30,
           sectionsSpace: 3,
-          centerSpaceRadius: 10,
+          centerSpaceRadius: widget.centerRadius,
           sections: showingSections(),
         ),
       ),
