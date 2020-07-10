@@ -112,8 +112,8 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     );
   }
 
-  void unFocusInput(){
-    if(!_shouldFocus) return;
+  void unFocusInput() {
+    if (!_shouldFocus) return;
     _nameFocus.unfocus();
     _descriptionFocus.unfocus();
     // ignore: unnecessary_statements
@@ -230,19 +230,119 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     );
   }
 
+  Widget _bottomButtons(BuildContext context, double height, double width) {
+    return Container(
+      height: height,
+      width: width,
+      padding: EdgeInsets.symmetric(
+        horizontal: 16,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          !isCreatingNewTask
+              ? Expanded(
+                  child: InkWell(
+                    onTap: () {},
+                    child: Container(
+                      child: Text(
+                        "Delete",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: CANCELED_COLOR,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: CANCELED_COLOR,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(0),
+                        color: Colors.transparent,
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 15,
+                      ),
+                    ),
+                  ),
+                )
+              : Container(),
+          !isCreatingNewTask
+              ? SizedBox(
+                  width: 5,
+                )
+              : Container(),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                print("On tap Save");
+                if (isCreatingNewTask) {
+                  _isNameValid = _inputValidation(
+                      value: _nameController.text, validCheck: _isNameValid);
+                  _isDescriptionValid = _inputValidation(
+                      value: _descriptionController.text,
+                      validCheck: _isDescriptionValid);
+                  if (_isNameValid && _isDescriptionValid) {
+                    if (_taskProvider.addNewTask(
+                        title: _nameController.text,
+                        description: _descriptionController.text,
+                        startDate: _taskStartDate.toString(),
+                        endDate: _taskEndDate.toString(),
+                        startTime: _taskStartTime.format(context),
+                        endTime: _taskEndTime.format(context),
+                        status: "NEW")) {
+                      Navigator.of(context).pop();
+                    }
+                    //Save Data
+                  }
+                }
+              },
+              child: Container(
+                width: double.infinity,
+                child: Text(
+                  isCreatingNewTask ? "Save" : "Update",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.blue,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(0),
+                  color: Colors.blue,
+                ),
+                padding: EdgeInsets.symmetric(
+                  vertical: 15,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final dateFormat = new DateFormat('dd MMMM yyyy');
     final timeFormat = new DateFormat('HH:mm');
     _taskEndTime = TimeOfDay.now();
-    if(_taskEndTime.hour + 1 >= 24)
+    if (_taskEndTime.hour + 1 >= 24)
       _taskEndTime.replacing(
-          hour: 0,
+        hour: 0,
       );
-    else _taskEndTime.replacing(
-      hour: _taskEndTime.hour + 1,
-    );
+    else
+      _taskEndTime.replacing(
+        hour: _taskEndTime.hour + 1,
+      );
     unFocusInput();
     int id = ModalRoute.of(context).settings.arguments as int;
     if (id != -1) {
@@ -275,249 +375,258 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                   Positioned(
                     child: Container(
                       height: !isKeyBoardOn
-                          ? constraints.maxHeight * 0.9
+                          ? constraints.maxHeight - 75
                           : constraints.maxHeight,
                       width: constraints.maxWidth,
                       child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            bottom: 15,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
 //                            this._customAppBar(),
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              child: Text(
-                                "Add Task",
-                                style: TextStyle(
-                                  fontSize: 35,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                child: Text(
+                                  "Add Task",
+                                  style: TextStyle(
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  // Top Title
-                                  Container(
-                                    width: double.infinity,
-                                    padding: EdgeInsets.only(
-                                      bottom: 5,
-                                    ),
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "Task Info",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    // Top Title
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.only(
+                                        bottom: 5,
+                                      ),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "Task Info",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
-                                  ),
 
-                                  Container(
-                                    alignment: Alignment.centerLeft,
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 5,
-                                    ),
-                                    child: Text(
-                                      "Name",
-                                      style: TextStyle(
-                                        fontSize: 14,
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 5,
+                                      ),
+                                      child: Text(
+                                        "Name",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  _inputTextField(
-                                      controller: _nameController,
-                                      focusNode: _nameFocus,
-                                      validation: _inputValidation,
-                                      validCheck: _isNameValid),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 5,
+                                    _inputTextField(
+                                        controller: _nameController,
+                                        focusNode: _nameFocus,
+                                        validation: _inputValidation,
+                                        validCheck: _isNameValid),
+                                    SizedBox(
+                                      height: 10,
                                     ),
-                                    child: Wrap(
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      children: <Widget>[
-                                        Text(
-                                          "Description",
-                                          style: TextStyle(
-                                            fontSize: 14,
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 5,
+                                      ),
+                                      child: Wrap(
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            "Description",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                            ),
                                           ),
-                                        ),
-                                        true
-                                            ? SizedBox()
-                                            : Text(
-                                                "(ကွက်လပ်အဖြစ်ထားခဲ့လို့မရပါ)",
-                                                style: TextStyle(),
-                                              ),
-                                      ],
-                                    ),
-                                  ),
-                                  _textArea(
-                                    validCheck: _isDescriptionValid,
-                                    focusNode: _descriptionFocus,
-                                    controller: _descriptionController,
-                                  ),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Container(
-                                    width: double.infinity,
-                                    padding: EdgeInsets.only(
-                                      bottom: 5,
-                                    ),
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "Detail",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                                          true
+                                              ? SizedBox()
+                                              : Text(
+                                                  "(ကွက်လပ်အဖြစ်ထားခဲ့လို့မရပါ)",
+                                                  style: TextStyle(),
+                                                ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    width: double.infinity,
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 10,
-                                      horizontal: 15,
+                                    _textArea(
+                                      validCheck: _isDescriptionValid,
+                                      focusNode: _descriptionFocus,
+                                      controller: _descriptionController,
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: INPUT_BG_COLOR,
-                                      borderRadius: BorderRadius.circular(20),
+                                    SizedBox(
+                                      height: 20,
                                     ),
-                                    child: Column(
-                                      children: <Widget>[
-                                        _detailListTile(
-                                          'Start Date',
-                                          _taskStartDate != null
-                                              ? dateFormat
-                                                  .format(_taskStartDate)
-                                              : dateFormat
-                                                  .format(DateTime.now()),
-                                          () {
-                                            showDatePicker(
-                                                    context: context,
-                                                    initialDate:
-                                                        _taskStartDate != null
-                                                            ? _taskStartDate
-                                                            : DateTime.now(),
-                                                    firstDate: DateTime.now(),
-                                                    lastDate: DateTime(3000))
-                                                .then((date) {
-                                              setState(() {
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.only(
+                                        bottom: 5,
+                                      ),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "Detail",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 10,
+                                        horizontal: 15,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: INPUT_BG_COLOR,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        children: <Widget>[
+                                          _detailListTile(
+                                            'Start Date',
+                                            _taskStartDate != null
+                                                ? dateFormat
+                                                    .format(_taskStartDate)
+                                                : dateFormat
+                                                    .format(DateTime.now()),
+                                            () {
+                                              showDatePicker(
+                                                      context: context,
+                                                      initialDate:
+                                                          _taskStartDate != null
+                                                              ? _taskStartDate
+                                                              : DateTime.now(),
+                                                      firstDate: DateTime.now(),
+                                                      lastDate: DateTime(3000))
+                                                  .then((date) {
+                                                setState(() {
+                                                  _shouldFocus = true;
+                                                  if (date != null)
+                                                    this._taskStartDate = date;
+                                                });
+                                              });
+                                            },
+                                          ),
+                                          _divider(),
+                                          _detailListTile(
+                                            'Start Time',
+                                            _taskStartTime == null
+                                                ? "Not Setted"
+                                                : _taskStartTime
+                                                    .format(context),
+                                            () {
+                                              showTimePicker(
+                                                      context: context,
+                                                      initialTime:
+                                                          _taskStartTime == null
+                                                              ? TimeOfDay.now()
+                                                              : _taskStartTime)
+                                                  .then((time) {
                                                 _shouldFocus = true;
-                                                if (date != null)
-                                                  this._taskStartDate = date;
+                                                setState(() {
+                                                  if (time != null)
+                                                    this._taskStartTime = time;
+                                                });
                                               });
-                                            });
-                                          },
-                                        ),
-                                        _divider(),
-                                        _detailListTile(
-                                          'Start Time',
-                                          _taskStartTime == null
-                                              ? "Not Setted"
-                                              : _taskStartTime.format(context),
-                                          () {
-                                            showTimePicker(
-                                                    context: context,
-                                                    initialTime:
-                                                        _taskStartTime == null
-                                                            ? TimeOfDay.now()
-                                                            : _taskStartTime)
-                                                .then((time) {
-                                              _shouldFocus = true;
-                                              setState(() {
-                                                if (time != null)
-                                                  this._taskStartTime = time;
+                                            },
+                                          ),
+                                          _divider(),
+                                          _detailListTile(
+                                            'End Date',
+                                            _taskEndDate != null
+                                                ? dateFormat
+                                                    .format(_taskEndDate)
+                                                : dateFormat.format(
+                                                    DateTime.now().add(
+                                                        Duration(days: 1))),
+                                            () {
+                                              showDatePicker(
+                                                      context: context,
+                                                      initialDate:
+                                                          _taskEndDate != null
+                                                              ? _taskEndDate
+                                                              : DateTime.now(),
+                                                      firstDate: DateTime.now(),
+                                                      lastDate: DateTime(3000))
+                                                  .then((date) {
+                                                _shouldFocus = true;
+                                                setState(() {
+                                                  if (date != null)
+                                                    this._taskEndDate = date;
+                                                });
                                               });
-                                            });
-                                          },
-                                        ),
-                                        _divider(),
-                                        _detailListTile(
-                                          'End Date',
-                                          _taskEndDate != null
-                                              ? dateFormat.format(_taskEndDate)
-                                              : dateFormat.format(DateTime.now()
-                                                  .add(Duration(days: 1))),
-                                          () {
-                                            showDatePicker(
-                                                    context: context,
-                                                    initialDate:
-                                                        _taskEndDate != null
-                                                            ? _taskEndDate
-                                                            : DateTime.now(),
-                                                    firstDate: DateTime.now(),
-                                                    lastDate: DateTime(3000))
-                                                .then((date) {
-                                              _shouldFocus = true;
-                                              setState(() {
-                                                if (date != null)
-                                                  this._taskEndDate = date;
+                                            },
+                                          ),
+                                          _divider(),
+                                          _detailListTile(
+                                            'End Time',
+                                            _taskEndTime == null
+                                                ? "Not Setted"
+                                                : _taskEndTime.format(context),
+                                            () {
+                                              showTimePicker(
+                                                      context: context,
+                                                      initialTime:
+                                                          _taskEndTime == null
+                                                              ? TimeOfDay.now()
+                                                              : _taskEndTime)
+                                                  .then((time) {
+                                                _shouldFocus = true;
+                                                setState(() {
+                                                  if (time != null) {
+                                                    if (_taskStartDate.compareTo(
+                                                                _taskEndDate) ==
+                                                            0 &&
+                                                        (time.hour * 60 +
+                                                                time.minute) <
+                                                            (_taskStartTime
+                                                                        .hour *
+                                                                    60 +
+                                                                _taskStartDate
+                                                                    .minute)) {
+                                                      _taskEndTime =
+                                                          TimeOfDay.now()
+                                                              .replacing(
+                                                        hour: TimeOfDay.now()
+                                                                .hour +
+                                                            1,
+                                                      );
+                                                    } else
+                                                      this._taskEndTime = time;
+                                                  }
+                                                });
                                               });
-                                            });
-                                          },
-                                        ),
-                                        _divider(),
-                                        _detailListTile(
-                                          'End Time',
-                                          _taskEndTime == null
-                                              ? "Not Setted"
-                                              : _taskEndTime.format(context),
-                                          () {
-                                            showTimePicker(
-                                                    context: context,
-                                                    initialTime:
-                                                        _taskEndTime == null
-                                                            ? TimeOfDay.now()
-                                                            : _taskEndTime)
-                                                .then((time) {
-                                              _shouldFocus = true;
-                                              setState(() {
-                                                if (time != null) {
-                                                  if (_taskStartDate.compareTo(
-                                                              _taskEndDate) ==
-                                                          0 &&
-                                                      (time.hour * 60 +
-                                                              time.minute) <
-                                                          (_taskStartTime.hour *
-                                                                  60 +
-                                                              _taskStartDate
-                                                                  .minute)) {
-                                                    _taskEndTime =
-                                                        TimeOfDay.now()
-                                                            .replacing(
-                                                      hour:
-                                                          TimeOfDay.now().hour +
-                                                              1,
-                                                    );
-                                                  } else
-                                                    this._taskEndTime = time;
-                                                }
-                                              });
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            )
-                          ],
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -527,110 +636,8 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                       : Positioned(
                           bottom: 0,
                           left: 0,
-                          child: Container(
-                            height: constraints.maxHeight * 0.1,
-                            width: constraints.maxWidth,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                !isCreatingNewTask
-                                    ? Expanded(
-                                        child: InkWell(
-                                          onTap: () {},
-                                          child: Container(
-                                            child: Text(
-                                              "Delete",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: CANCELED_COLOR,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: CANCELED_COLOR,
-                                                width: 2,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                              color: Colors.transparent,
-                                            ),
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 15,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : Container(),
-                                !isCreatingNewTask
-                                    ? SizedBox(
-                                        width: 5,
-                                      )
-                                    : Container(),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      print("On tap Save");
-                                      if (isCreatingNewTask) {
-                                        _isNameValid = _inputValidation(
-                                            value: _nameController.text,
-                                            validCheck: _isNameValid);
-                                        _isDescriptionValid = _inputValidation(
-                                            value: _descriptionController.text,
-                                            validCheck: _isDescriptionValid);
-                                        if (_isNameValid &&
-                                            _isDescriptionValid) {
-                                          if (_taskProvider.addNewTask(
-                                              title: _nameController.text,
-                                              description:
-                                                  _descriptionController.text,
-                                              startDate:
-                                                  _taskStartDate.toString(),
-                                              endDate: _taskEndDate.toString(),
-                                              startTime: _taskStartTime
-                                                  .format(context),
-                                              endTime:
-                                                  _taskEndTime.format(context),
-                                              status: "NEW")) {
-                                            Navigator.of(context).pop();
-                                          }
-                                          //Save Data
-                                        }
-                                      }
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      child: Text(
-                                        isCreatingNewTask ? "Save" : "Update",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.blue,
-                                          width: 2,
-                                        ),
-                                        borderRadius: BorderRadius.circular(0),
-                                        color: Colors.blue,
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 15,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          child:
+                              _bottomButtons(context, 75, constraints.maxWidth),
                         ),
                 ],
               ),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager/model/task_model.dart';
 import 'package:task_manager/page/task_detail_edit_page.dart';
 import 'package:task_manager/provider/task_provider.dart';
+import 'package:task_manager/util/global_data.dart';
 import 'package:task_manager/widget/pie_chart_widget.dart';
 import 'package:task_manager/widget/task_card_view_widget.dart';
 import 'package:task_manager/widget/value_indicator.dart';
@@ -18,6 +19,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   PageController _pageController;
   TaskProvider _taskProvider;
+  bool _shouldShowPie = false;
+
 
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _HomePageState extends State<HomePage> {
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {
+                _shouldShowPie = (constraints.maxHeight / (PIE_ON_FOCUS_RADIUS * 2 +  PIE_MIDDLE_CIRCLE_RADIUS * 2) >= 4);
                 return Container(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -64,9 +68,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      Container(
+                      _shouldShowPie ? Container(
                         width: constraints.maxWidth,
-                        height: constraints.maxHeight * 0.235,
+                        height: PIE_ON_FOCUS_RADIUS * 2 +  PIE_MIDDLE_CIRCLE_RADIUS * 2,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                         ),
@@ -93,91 +97,105 @@ class _HomePageState extends State<HomePage> {
                         ),
 
 //                    color: Colors.blue,
-                      ),
+                      ) : SizedBox(height: 20,),
                       Expanded(
                         child: Container(
+                          width: constraints.maxWidth,
+                          padding: EdgeInsets.only(
+                            top: 15,
+                          ),
                           child: Column(
                             children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  Container(
-                                    margin: const EdgeInsets.only(
-                                      right: 20,
-                                    ),
-                                    padding: const EdgeInsets.only(
-                                      left: 16,
-                                    ),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "Today",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                          ),
+                              NotificationListener<OverscrollIndicatorNotification>(
+                                onNotification: (overscroll) {
+                                  // ignore: missing_return
+                                  overscroll.disallowGlow();
+                                  return false;
+                                },
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: <Widget>[
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                          right: 20,
                                         ),
-                                        Container(
-                                          margin: const EdgeInsets.only(
-                                            top: 7,
-                                          ),
-                                          width: 75,
-                                          height: 3,
-                                          color: Colors.blue,
-                                        )
-                                      ],
-                                      mainAxisSize: MainAxisSize.min,
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.only(
-                                      right: 20,
-                                    ),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "Week",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                          ),
+                                        padding: const EdgeInsets.only(
+                                          left: 16,
                                         ),
-                                        Container(
-                                          margin: const EdgeInsets.only(
-                                            top: 7,
-                                          ),
-                                          width: 75,
-                                          height: 3,
-                                          color: Colors.blue,
-                                        )
-                                      ],
-                                      mainAxisSize: MainAxisSize.min,
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.only(
-                                      right: 20,
-                                    ),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "Month",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                          ),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Text(
+                                              "Today",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                top: 7,
+                                              ),
+                                              width: 75,
+                                              height: 3,
+                                              color: Colors.blue,
+                                            )
+                                          ],
+                                          mainAxisSize: MainAxisSize.min,
                                         ),
-                                        Container(
-                                          margin: const EdgeInsets.only(
-                                            top: 7,
-                                          ),
-                                          width: 75,
-                                          height: 3,
-                                          color: Colors.blue,
-                                        )
-                                      ],
-                                      mainAxisSize: MainAxisSize.min,
-                                    ),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                          right: 20,
+                                        ),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Text(
+                                              "Week",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                top: 7,
+                                              ),
+                                              width: 75,
+                                              height: 3,
+                                              color: Colors.blue,
+                                            )
+                                          ],
+                                          mainAxisSize: MainAxisSize.min,
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                          right: 20,
+                                        ),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Text(
+                                              "Month",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                top: 7,
+                                              ),
+                                              width: 75,
+                                              height: 3,
+                                              color: Colors.blue,
+                                            )
+                                          ],
+                                          mainAxisSize: MainAxisSize.min,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                               Expanded(
                                 child: LayoutBuilder(
