@@ -51,19 +51,24 @@ class TaskCardView extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                       flex: 3,
-                      child: Align(
-                        alignment:
-                        Alignment
-                            .topCenter,
-                        child:
-                        Container(
-                          width: 15,
-                          height: 15,
-                          decoration: BoxDecoration(
-                              color:
-                              DONE_COLOR,
-                              borderRadius:
-                              BorderRadius.circular(100)),
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: 15,
+                        ),
+                        child: Align(
+                          alignment:
+                          Alignment
+                              .centerLeft,
+                          child:
+                          Container(
+                            width: 15,
+                            height: 15,
+                            decoration: BoxDecoration(
+                                color:
+                                DONE_COLOR,
+                                borderRadius:
+                                BorderRadius.circular(100)),
+                          ),
                         ),
                       )),
                   Expanded(
@@ -138,26 +143,34 @@ class TaskCardView extends StatelessWidget {
                           "09:30 AM - 10:45 AM"),
                     ),
                   ),
+//                  Expanded(
+//                    flex: 3,
+//                    child: Container(
+//                      child: Icon(
+//                        Icons
+//                            .mode_edit,
+//                        size: 25,
+//                        color: Colors.lightBlue,
+//                      ),
+//                    ),
+//                  ),
                   Expanded(
-                    flex: 3,
+                    flex: 6,
                     child: Container(
-                      child: Icon(
-                        Icons
-                            .mode_edit,
-                        size: 25,
-                        color: Colors.lightBlue,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      child: Icon(
-                        Icons
-                            .delete,
-                        size: 25,
-                        color: CANCELED_COLOR,
-                      ),
+                      child:
+                        Text("Delete",
+                        style: TextStyle(
+                          color: CANCELED_COLOR,
+                          fontWeight: FontWeight.bold,
+                        ),
+                          textAlign: TextAlign.end,
+                        ),
+//                      Icon(
+//                        Icons
+//                            .delete,
+//                        size: 25,
+//                        color: CANCELED_COLOR,
+//                      ),
                     ),
                   ),
                 ],

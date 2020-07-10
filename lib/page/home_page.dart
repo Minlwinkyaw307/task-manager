@@ -49,12 +49,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Container(
                     width: constraints.maxWidth,
-                    height: constraints.maxHeight * 0.3,
+                    height: constraints.maxHeight * 0.235,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Expanded(
-                          flex: 6,
+                          flex: 5,
                           child: PieChartWidget(),
                         ),
                         Expanded(

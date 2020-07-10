@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_manager/page/home_page.dart';
+import 'package:task_manager/page/task_detail_edit_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      home: TaskDetailEdit(),
     );
   }
 }

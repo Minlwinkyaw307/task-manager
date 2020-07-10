@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import '../util/global_data.dart';
 
 class PieChartWidget extends StatefulWidget {
-  final double normal = 70;
-  final double onPressed = 80;
+  final double normal = 60;
+  final double onPressed = 70;
   PieChartWidget();
 
   @override
@@ -36,7 +36,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
           ),
           startDegreeOffset: 30,
           sectionsSpace: 3,
-          centerSpaceRadius: 20,
+          centerSpaceRadius: 10,
           sections: showingSections(),
         ),
       ),
