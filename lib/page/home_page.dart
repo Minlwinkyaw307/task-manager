@@ -20,12 +20,86 @@ class _HomePageState extends State<HomePage> {
   PageController _pageController;
   TaskProvider _taskProvider;
   bool _shouldShowPie = false;
+  int _currentPage = 0;
 
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+  }
+  Widget _topMenuBar(String title, int index){
+    bool active = index == _currentPage;
+    double width = active ? 75 : 0;
+
+    return GestureDetector(
+      onTap: () {
+        _currentPage = index;
+        _pageController.jumpToPage(index);
+      },
+      child: Container(
+        width: 75,
+        child: Column(
+          children: <Widget>[
+            Container(
+              width: 75,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            active ? Container(
+              margin: const EdgeInsets.only(
+                top: 7,
+              ),
+              width: width,
+              height: 3,
+              color: Colors.blue,
+            ) : Container(),
+          ],
+          mainAxisSize: MainAxisSize.min,
+        ),
+      ),
+    );
+  }
+
+  Widget _taskListPageView(BuildContext context, BoxConstraints constraints, List<Task> sortedTasks){
+    return Container(
+      width: constraints.maxWidth,
+      height: constraints.maxHeight,
+      margin: const EdgeInsets.only(
+        top: 15,
+      ),
+      child: SingleChildScrollView(
+        child: Container(
+          width: constraints.maxWidth,
+          height:
+          constraints.maxHeight * 0.95,
+          margin: EdgeInsets.only(
+            top: 10,
+            bottom: 20,
+          ),
+          child: ListView.builder(
+            itemCount: sortedTasks.length,
+            itemBuilder:
+                (context, index) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
+                child: TaskCardView(
+                  currentTask:
+                  sortedTasks[index],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -116,83 +190,15 @@ class _HomePageState extends State<HomePage> {
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                          right: 20,
-                                        ),
-                                        padding: const EdgeInsets.only(
-                                          left: 16,
-                                        ),
-                                        child: Column(
-                                          children: <Widget>[
-                                            Text(
-                                              "Today",
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: const EdgeInsets.only(
-                                                top: 7,
-                                              ),
-                                              width: 75,
-                                              height: 3,
-                                              color: Colors.blue,
-                                            )
-                                          ],
-                                          mainAxisSize: MainAxisSize.min,
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                          right: 20,
-                                        ),
-                                        child: Column(
-                                          children: <Widget>[
-                                            Text(
-                                              "Week",
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: const EdgeInsets.only(
-                                                top: 7,
-                                              ),
-                                              width: 75,
-                                              height: 3,
-                                              color: Colors.blue,
-                                            )
-                                          ],
-                                          mainAxisSize: MainAxisSize.min,
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                          right: 20,
-                                        ),
-                                        child: Column(
-                                          children: <Widget>[
-                                            Text(
-                                              "Month",
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: const EdgeInsets.only(
-                                                top: 7,
-                                              ),
-                                              width: 75,
-                                              height: 3,
-                                              color: Colors.blue,
-                                            )
-                                          ],
-                                          mainAxisSize: MainAxisSize.min,
-                                        ),
-                                      ),
+                                      _topMenuBar('Today', 0),
+                                      SizedBox(width:20,),
+                                      _topMenuBar('Week', 1),
+                                      SizedBox(width:20,),
+                                      _topMenuBar('Month', 2),
+                                      SizedBox(width:20,),
+                                      _topMenuBar('All', 3),
                                     ],
                                   ),
                                 ),
@@ -205,47 +211,18 @@ class _HomePageState extends State<HomePage> {
                                       height: constraints.maxHeight,
 
                                       child: PageView(
+                                        controller: _pageController,
                                         scrollDirection: Axis.horizontal,
                                         onPageChanged: (pageNo) {
-                                          print("Page Number " +
-                                              pageNo.toString());
+                                          setState(() {
+                                            _currentPage = pageNo;
+                                          });
                                         },
                                         children: <Widget>[
-                                          Container(
-                                            width: constraints.maxWidth,
-                                            height: constraints.maxHeight,
-                                            margin: const EdgeInsets.only(
-                                              top: 15,
-                                            ),
-                                            child: SingleChildScrollView(
-                                              child: Container(
-                                                width: constraints.maxWidth,
-                                                height:
-                                                    constraints.maxHeight * 0.95,
-                                                margin: EdgeInsets.only(
-                                                  top: 10,
-                                                  bottom: 20,
-                                                ),
-                                                child: ListView.builder(
-                                                  itemCount: this
-                                                      ._taskProvider
-                                                      .allTaskCount(),
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    return Container(
-                                                      padding: const EdgeInsets.symmetric(
-                                                        horizontal: 16,
-                                                      ),
-                                                      child: TaskCardView(
-                                                        currentTask:
-                                                            allTasks[index],
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          ),
+                                          _taskListPageView(context, constraints, allTasks),
+                                          _taskListPageView(context, constraints, [...allTasks, ...allTasks]),
+                                          _taskListPageView(context, constraints, allTasks),
+                                          _taskListPageView(context, constraints, allTasks),
                                         ],
                                       ),
                                     );
