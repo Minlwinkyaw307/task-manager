@@ -147,7 +147,7 @@ class Task {
       returnList.add(new Task(
         id: temp['id'],
         title: temp['title'],
-        description: temp['thumbnail'],
+        description: temp['description'],
         startDate: temp['startDate'],
         endDate: temp['endDate'],
         startTime: temp['startTime'],

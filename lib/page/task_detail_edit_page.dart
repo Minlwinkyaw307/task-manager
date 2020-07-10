@@ -19,13 +19,13 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
   DateTime _taskStartDate = DateTime.now();
   DateTime _taskEndDate = DateTime.now().add(Duration(days: 1));
   TimeOfDay _taskStartTime = TimeOfDay.now();
-  TimeOfDay _taskEndTime = TimeOfDay.now().replacing(
-    hour: TimeOfDay.now().hour + 1,
-  );
+  TimeOfDay _taskEndTime;
 
   var _nameController = TextEditingController();
   final FocusNode _nameFocus = FocusNode();
   bool _isNameValid = true;
+
+  bool _shouldFocus = false;
 
   var _descriptionController = TextEditingController();
   final FocusNode _descriptionFocus = FocusNode();
@@ -94,6 +94,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
             color: validCheck ? Colors.transparent : Colors.red, width: 1),
       ),
       child: TextFormField(
+        autofocus: false,
         controller: controller,
         focusNode: focusNode,
         textInputAction: TextInputAction.next,
@@ -109,6 +110,14 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
         ),
       ),
     );
+  }
+
+  void unFocusInput(){
+    if(!_shouldFocus) return;
+    _nameFocus.unfocus();
+    _descriptionFocus.unfocus();
+    // ignore: unnecessary_statements
+    _shouldFocus = false;
   }
 
   bool _inputValidation({
@@ -149,6 +158,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
       child: TextField(
         controller: controller,
         focusNode: focusNode,
+        autofocus: false,
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
         maxLines: 3,
@@ -220,11 +230,20 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final dateFormat = new DateFormat('dd MMMM yyyy');
     final timeFormat = new DateFormat('HH:mm');
-
+    _taskEndTime = TimeOfDay.now();
+    if(_taskEndTime.hour + 1 >= 24)
+      _taskEndTime.replacing(
+          hour: 0,
+      );
+    else _taskEndTime.replacing(
+      hour: _taskEndTime.hour + 1,
+    );
+    unFocusInput();
     int id = ModalRoute.of(context).settings.arguments as int;
     if (id != -1) {
       isCreatingNewTask = true;
@@ -398,6 +417,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                     lastDate: DateTime(3000))
                                                 .then((date) {
                                               setState(() {
+                                                _shouldFocus = true;
                                                 if (date != null)
                                                   this._taskStartDate = date;
                                               });
@@ -418,6 +438,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                             ? TimeOfDay.now()
                                                             : _taskStartTime)
                                                 .then((time) {
+                                              _shouldFocus = true;
                                               setState(() {
                                                 if (time != null)
                                                   this._taskStartTime = time;
@@ -442,6 +463,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                     firstDate: DateTime.now(),
                                                     lastDate: DateTime(3000))
                                                 .then((date) {
+                                              _shouldFocus = true;
                                               setState(() {
                                                 if (date != null)
                                                   this._taskEndDate = date;
@@ -463,6 +485,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                             ? TimeOfDay.now()
                                                             : _taskEndTime)
                                                 .then((time) {
+                                              _shouldFocus = true;
                                               setState(() {
                                                 if (time != null) {
                                                   if (_taskStartDate.compareTo(
