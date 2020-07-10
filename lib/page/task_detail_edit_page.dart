@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:task_manager/model/task_model.dart';
+import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/util/global_data.dart';
 
 class TaskDetailEdit extends StatefulWidget {
@@ -11,6 +14,8 @@ class TaskDetailEdit extends StatefulWidget {
 }
 
 class _TaskDetailEditState extends State<TaskDetailEdit> {
+  TaskProvider _taskProvider;
+  Task _currentTask;
   DateTime _taskStartDate = DateTime.now();
   DateTime _taskEndDate = DateTime.now().add(Duration(days: 1));
   TimeOfDay _taskStartTime = TimeOfDay.now();
@@ -26,7 +31,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
   final FocusNode _descriptionFocus = FocusNode();
   bool _isDescriptionValid = true;
 
-  bool isCreatingNewTask = false;
+  bool isCreatingNewTask = true;
 
   Widget _customAppBar() {
     return Container(
@@ -112,9 +117,13 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     FocusNode focusNode,
   }) {
     setState(() {
-      if (value.length == 0 || value.replaceAll(' ', '').length == 0)
+      if (value.length == 0 || value.replaceAll(' ', '').length == 0) {
         validCheck = false;
-      else {
+        print("Not Valid" +
+            _isNameValid.toString() +
+            " " +
+            _isDescriptionValid.toString());
+      } else {
         validCheck = true;
         if (focusNode != null) FocusScope.of(context).requestFocus(focusNode);
       }
@@ -216,9 +225,27 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     final dateFormat = new DateFormat('dd MMMM yyyy');
     final timeFormat = new DateFormat('HH:mm');
 
-    print(MediaQuery.of(context).viewInsets.bottom == 0);
+    int id = ModalRoute.of(context).settings.arguments as int;
+    if (id != -1) {
+      isCreatingNewTask = true;
+      this._currentTask = _taskProvider.getTaskByID(id);
+      _taskStartDate = this._currentTask.startDate;
+      _taskEndDate = this._currentTask.endDate;
+      _taskStartTime = this._currentTask.startTime;
+      _taskEndTime = this._currentTask.endTime;
+    }
+    this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
+
+    bool isKeyBoardOn = MediaQuery.of(context).viewInsets.bottom != 0;
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.black,
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ),
         body: LayoutBuilder(
           builder: (context, constraints) {
             return Container(
@@ -226,105 +253,11 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
               width: constraints.maxWidth,
               child: Stack(
                 children: <Widget>[
-                  MediaQuery.of(context).viewInsets.bottom != 0.0
-                      ? Container()
-                      : Positioned(
-                          bottom: 0,
-                          left: 0,
-                          child: Container(
-                            height: constraints.maxHeight * 0.1,
-                            width: constraints.maxWidth,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                !isCreatingNewTask
-                                    ? Expanded(
-                                        child: InkWell(
-                                          onTap: () {},
-                                          child: Container(
-                                            child: Text(
-                                              "Delete",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: CANCELED_COLOR,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: CANCELED_COLOR,
-                                                width: 2,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                              color: Colors.transparent,
-                                            ),
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 15,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : Container(),
-                                !isCreatingNewTask
-                                    ? SizedBox(
-                                        width: 5,
-                                      )
-                                    : Container(),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (isCreatingNewTask) {
-                                        if (_inputValidation(
-                                                value: _nameController.text,
-                                                validCheck: _isNameValid) &&
-                                            _inputValidation(
-                                                value:
-                                                    _descriptionController.text,
-                                                validCheck:
-                                                    _isDescriptionValid)) {
-                                          //Save Data
-                                        }
-                                      }
-                                    },
-                                    child: Container(
-                                      child: Text(
-                                        isCreatingNewTask ? "Save" : "Update",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.blue,
-                                          width: 2,
-                                        ),
-                                        borderRadius: BorderRadius.circular(0),
-                                        color: Colors.blue,
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 15,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                   Positioned(
                     child: Container(
-                      height: MediaQuery.of(context).viewInsets.bottom == 0.0
-                          ? constraints.maxHeight
-                          : constraints.maxHeight * 0.9,
+                      height: !isKeyBoardOn
+                          ? constraints.maxHeight * 0.9
+                          : constraints.maxHeight,
                       width: constraints.maxWidth,
                       child: SingleChildScrollView(
                         child: Column(
@@ -332,7 +265,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
                           children: <Widget>[
-                            this._customAppBar(),
+//                            this._customAppBar(),
                             Container(
                               alignment: Alignment.centerLeft,
                               padding: EdgeInsets.symmetric(
@@ -532,12 +465,24 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                 .then((time) {
                                               setState(() {
                                                 if (time != null) {
-                                                  if(_taskStartDate.compareTo(_taskEndDate) == 0 && (time.hour * 60 + time.minute) < (_taskStartTime.hour * 60 + _taskStartDate.minute)){
-                                                    _taskEndTime = TimeOfDay.now().replacing(
-                                                      hour: TimeOfDay.now().hour + 1,
+                                                  if (_taskStartDate.compareTo(
+                                                              _taskEndDate) ==
+                                                          0 &&
+                                                      (time.hour * 60 +
+                                                              time.minute) <
+                                                          (_taskStartTime.hour *
+                                                                  60 +
+                                                              _taskStartDate
+                                                                  .minute)) {
+                                                    _taskEndTime =
+                                                        TimeOfDay.now()
+                                                            .replacing(
+                                                      hour:
+                                                          TimeOfDay.now().hour +
+                                                              1,
                                                     );
-                                                  }
-                                                  else this._taskEndTime = time;
+                                                  } else
+                                                    this._taskEndTime = time;
                                                 }
                                               });
                                             });
@@ -554,6 +499,116 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                       ),
                     ),
                   ),
+                  isKeyBoardOn
+                      ? Container()
+                      : Positioned(
+                          bottom: 0,
+                          left: 0,
+                          child: Container(
+                            height: constraints.maxHeight * 0.1,
+                            width: constraints.maxWidth,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                !isCreatingNewTask
+                                    ? Expanded(
+                                        child: InkWell(
+                                          onTap: () {},
+                                          child: Container(
+                                            child: Text(
+                                              "Delete",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: CANCELED_COLOR,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: CANCELED_COLOR,
+                                                width: 2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              color: Colors.transparent,
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
+                                !isCreatingNewTask
+                                    ? SizedBox(
+                                        width: 5,
+                                      )
+                                    : Container(),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      print("On tap Save");
+                                      if (isCreatingNewTask) {
+                                        _isNameValid = _inputValidation(
+                                            value: _nameController.text,
+                                            validCheck: _isNameValid);
+                                        _isDescriptionValid = _inputValidation(
+                                            value: _descriptionController.text,
+                                            validCheck: _isDescriptionValid);
+                                        if (_isNameValid &&
+                                            _isDescriptionValid) {
+                                          if (_taskProvider.addNewTask(
+                                              title: _nameController.text,
+                                              description:
+                                                  _descriptionController.text,
+                                              startDate:
+                                                  _taskStartDate.toString(),
+                                              endDate: _taskEndDate.toString(),
+                                              startTime: _taskStartTime
+                                                  .format(context),
+                                              endTime:
+                                                  _taskEndTime.format(context),
+                                              status: "NEW")) {
+                                            Navigator.of(context).pop();
+                                          }
+                                          //Save Data
+                                        }
+                                      }
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      child: Text(
+                                        isCreatingNewTask ? "Save" : "Update",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.blue,
+                                          width: 2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(0),
+                                        color: Colors.blue,
+                                      ),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                 ],
               ),
             );

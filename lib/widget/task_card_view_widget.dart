@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:task_manager/model/task_model.dart';
 import 'package:task_manager/util/global_data.dart';
 
 class TaskCardView extends StatelessWidget {
+  final Task currentTask;
+
+
+  TaskCardView({@required this.currentTask});
+
   @override
   Widget build(BuildContext context) {
+    final dateFormat = new DateFormat('dd.MM.yyyy');
+
     return Opacity(
       opacity: 1,
       child: Container(
-        width: double.infinity,
+//        width: double.infinity,
         padding: EdgeInsets.symmetric(
           vertical: 10,
           horizontal: 5,
@@ -79,7 +88,7 @@ class TaskCardView extends StatelessWidget {
                       children: <
                           Widget>[
                         Text(
-                          'Title of the Task',
+                          currentTask.title,
                           style: TextStyle(
                               fontSize:
                               18,
@@ -87,7 +96,7 @@ class TaskCardView extends StatelessWidget {
                               FontWeight.w600),
                         ),
                         Text(
-                          '09.07.2020',
+                          dateFormat.format(currentTask.startDate),
                           style: TextStyle(
                               fontSize:
                               15,
@@ -101,6 +110,7 @@ class TaskCardView extends StatelessWidget {
               ),
             ),
             Container(
+              width: double.infinity,
               child: Padding(
                 padding:
                 const EdgeInsets
@@ -109,7 +119,7 @@ class TaskCardView extends StatelessWidget {
                   vertical: 15,
                 ),
                 child: Text(
-                  "is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been",
+                  currentTask.description.toString(),
                   style: TextStyle(
                       fontSize: 15,
                       fontWeight:

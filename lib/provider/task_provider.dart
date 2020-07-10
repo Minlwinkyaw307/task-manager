@@ -15,6 +15,7 @@ class TaskProvider with ChangeNotifier {
 
   Future<bool> init() async {
     try {
+      await this.databaseManager.database.execute(Task.createTableString());
       await retrieveAndUpdateTasks();
       return true;
     } catch (error) {
@@ -27,7 +28,6 @@ class TaskProvider with ChangeNotifier {
     try {
       if (this.databaseManager.database == null)
         throw Exception("Database is Null");
-
       List<Task> tempTasks =
           await Task.retrieveAllAsList(this.databaseManager.database);
       tempTasks.forEach((element) {
@@ -41,6 +41,10 @@ class TaskProvider with ChangeNotifier {
           'Getting Error while Retrieving Data For Task : ' + error.toString());
       return false;
     }
+  }
+
+  int allTaskCount(){
+    return this._tasks.length;
   }
 
   List<Task> getListOfTasks() {
@@ -62,13 +66,15 @@ class TaskProvider with ChangeNotifier {
   bool addNewTask ({
     @required String title,
     @required String description,
-    @required DateTime startDate,
-    @required DateTime endDate,
-    @required TimeOfDay startTime,
-    @required TimeOfDay endTime,
+    @required String startDate,
+    @required String endDate,
+    @required String startTime,
+    @required String endTime,
+    @required String status
   }){
     try{
       int id = new Random().nextInt(100000);
+
       Task task = Task.addNew(this.databaseManager.database, {
         'id': id,
         'title': title,
@@ -77,10 +83,13 @@ class TaskProvider with ChangeNotifier {
         'endDate': endDate,
         'startTime': startTime,
         'endTime': endTime,
+        'status': status,
       });
       this._tasks[id] = task;
+      print(task.description);
+      notifyListeners();
     }catch(e){
-      print("Got Error while creating new task in provider");
+      print("Got Error while creating new task in provider : " + e.toString());
       return false;
     }
     return true;

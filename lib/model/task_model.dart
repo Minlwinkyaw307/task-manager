@@ -14,6 +14,8 @@ class Task {
   String _startTime;
   String _endTime;
 
+  String status;
+
   DateTime get startDate {
     return DateTime.parse(this._startDate);
   }
@@ -56,15 +58,16 @@ class Task {
     @required this.id,
     @required this.title,
     @required this.description,
-    @required DateTime startDate,
-    @required DateTime endDate,
-    @required TimeOfDay startTime,
-    @required TimeOfDay endTime,
+    @required String startDate,
+    @required String endDate,
+    @required String startTime,
+    @required String endTime,
+    @required this.status
   }) {
-    this.startDate = startDate;
-    this.endDate = endDate;
-    this.startTime = startTime;
-    this.endTime = endTime;
+    this._startDate = startDate;
+    this._endDate = endDate;
+    this._startTime = startTime;
+    this._endTime = endTime;
   }
 
   Task.addNew(Database database, Map<String, dynamic> mapObj) {
@@ -74,23 +77,26 @@ class Task {
         mapObj.containsKey('startDate') &&
         mapObj.containsKey('endDate') &&
         mapObj.containsKey('startTime') &&
-        mapObj.containsKey('endTime')) {
+        mapObj.containsKey('endTime') &&
+        mapObj.containsKey('status')) {
       this.id = mapObj['id'];
       this.title = mapObj['title'];
       this.description = mapObj['description'];
-      this.startDate = mapObj['startDate'];
-      this.endDate = mapObj['endDate'];
-      this.startTime = mapObj['startTime'];
-      this.endTime = mapObj['endTime'];
-      database.execute(createTableString()).then((_) {
+      this._startDate = mapObj['startDate'];
+      this._endDate = mapObj['endDate'];
+      this._startTime = mapObj['startTime'];
+      this._endTime = mapObj['endTime'];
+      this.status = mapObj['status'];
+      database.execute(Task.createTableString()).then((_) {
         database.rawInsert(this.replaceDBString(), [
           this.id,
           this.title,
           this.description,
-          this.startDate.toString(),
-          this.endDate.toString(),
-          this.startTime.toString(),
-          this.endTime.toString(),
+          this._startDate,
+          this._endDate,
+          this._startTime,
+          this._endTime,
+          this.status,
         ]);
       }).then((id) {
 //        this.id = id;
@@ -146,24 +152,26 @@ class Task {
         endDate: temp['endDate'],
         startTime: temp['startTime'],
         endTime: temp['endTime'],
+        status: temp['status'],
       ));
     }
     return returnList;
   }
 
-  String createTableString() {
+  static String createTableString() {
     return 'CREATE TABLE IF NOT EXISTS ${Task.tableName} ('
         'id INTEGER PRIMARY KEY AUTOINCREMENT, '
         'title TEXT, '
         'description TEXT, '
-        'startDate TEXT, '
-        'endDate TEXT, '
+        'startDate DATE, '
+        'endDate DATE, '
         'startTime TEXT, '
-        'endTime TEXT)';
+        'endTime TEXT, '
+        'status TEXT)';
   }
 
   String replaceDBString() {
-    return 'REPLACE INTO ${Task.tableName} (id, title, description, startDate, endDate, startTime, endTime) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    return 'REPLACE INTO ${Task.tableName} (id, title, description, startDate, endDate, startTime, endTime, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
   }
 
   static Future<bool> dropDB(Database database) async {

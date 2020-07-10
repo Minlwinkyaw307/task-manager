@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_manager/model/task_model.dart';
 import 'package:task_manager/page/home_page.dart';
 import 'package:task_manager/page/task_detail_edit_page.dart';
 import 'package:task_manager/provider/task_provider.dart';

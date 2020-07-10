@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/util/global_data.dart';
+import 'package:provider/provider.dart';
+import 'package:task_manager/model/task_model.dart';
+import 'package:task_manager/page/task_detail_edit_page.dart';
+import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/widget/pie_chart_widget.dart';
 import 'package:task_manager/widget/task_card_view_widget.dart';
 import 'package:task_manager/widget/value_indicator.dart';
@@ -13,6 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   PageController _pageController;
+  TaskProvider _taskProvider;
 
   @override
   void initState() {
@@ -22,11 +26,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
+    List<Task> allTasks = this._taskProvider.getListOfTasks();
     return SafeArea(
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-
+            Navigator.of(
+                context)
+                .pushNamed(
+                TaskDetailEdit.ROUTE_NAME,
+                arguments: -1);
           },
           child: Icon(
             Icons.add
@@ -34,7 +44,7 @@ class _HomePageState extends State<HomePage> {
         ),
           body: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 16,
+          horizontal: 0,
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -90,7 +100,6 @@ class _HomePageState extends State<HomePage> {
 //                      fontWeight: FontWeight.w300,
 //                    ),
 //                  ),
-
                   Expanded(
                     child: Container(
                       child: Column(
@@ -186,6 +195,7 @@ class _HomePageState extends State<HomePage> {
                                       print("Page Number " + pageNo.toString());
                                     },
                                     children: <Widget>[
+
                                       Container(
                                         width: constraints.maxWidth,
                                         height: constraints.maxHeight,
@@ -194,52 +204,21 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: SingleChildScrollView(
                                           child: Container(
-                                            child: Column(
-                                              children: <Widget>[
-                                                TaskCardView(),
-                                                TaskCardView(),
-                                                TaskCardView(),
-                                              ],
+                                            width: constraints.maxWidth,
+                                            height: constraints.maxHeight * 0.9,
+                                            margin: EdgeInsets.symmetric(
+                                              vertical: 20,
+                                            ),
+                                            child: ListView.builder(
+                                              itemCount: this._taskProvider.allTaskCount(),
+                                              itemBuilder: (context, index){
+                                                return TaskCardView(currentTask: allTasks[index],);
+                                              },
                                             ),
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        width: constraints.maxWidth,
-                                        height: constraints.maxHeight,
-                                        padding: const EdgeInsets.only(
-                                          top: 15,
-                                        ),
-                                        child: SingleChildScrollView(
-                                          child: Container(
-                                            child: Column(
-                                              children: <Widget>[
-                                                TaskCardView(),
-                                                TaskCardView(),
-                                                TaskCardView(),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: constraints.maxWidth,
-                                        height: constraints.maxHeight,
-                                        padding: const EdgeInsets.only(
-                                          top: 15,
-                                        ),
-                                        child: SingleChildScrollView(
-                                          child: Container(
-                                            child: Column(
-                                              children: <Widget>[
-                                                TaskCardView(),
-                                                TaskCardView(),
-                                                TaskCardView(),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+
                                     ],
                                   ),
                                 );
