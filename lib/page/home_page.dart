@@ -5,9 +5,11 @@ import 'package:task_manager/model/task_model.dart';
 import 'package:task_manager/page/task_detail_edit_page.dart';
 import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/util/global_data.dart';
+import 'package:task_manager/util/global_method.dart';
 import 'package:task_manager/widget/pie_chart_widget.dart';
 import 'package:task_manager/widget/task_card_view_widget.dart';
 import 'package:task_manager/widget/value_indicator.dart';
+import 'package:vibration/vibration.dart';
 
 class HomePage extends StatefulWidget {
   static const ROUTE_NAME = '/';
@@ -66,6 +68,42 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _bottomSheetOptionTile(String title, Color textColor, IconData icon, Color iconColor){
+    return ListTile(
+      leading: Icon(icon,
+        size: 30,
+        color: iconColor,
+      ),
+      title: Text(title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+          color: textColor,
+        ),),
+      onTap: () => print("Great"),
+    );
+  }
+
+  void _longPressTaskCard(){
+    vibrate(150, 50);
+    showModalBottomSheet(context: context, builder: (context){
+      return Container(
+        padding: const EdgeInsets.only(
+          bottom: 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _bottomSheetOptionTile("Pin on top", Colors.black87, Icons.fiber_pin, Colors.black54),
+            _bottomSheetOptionTile("Edit Task", Colors.black87, Icons.edit, Colors.black54),
+            _bottomSheetOptionTile("Cancel Task", Colors.black87, Icons.cancel, Colors.black54),
+            _bottomSheetOptionTile("Delete Task", Colors.red, Icons.delete, Colors.red),
+          ],
+        ),
+      );
+    });
+  }
+
   Widget _taskListPageView(BuildContext context, BoxConstraints constraints, List<Task> sortedTasks){
     return Container(
       width: constraints.maxWidth,
@@ -86,13 +124,16 @@ class _HomePageState extends State<HomePage> {
             itemCount: sortedTasks.length,
             itemBuilder:
                 (context, index) {
-              return Container(
+              return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                 ),
-                child: TaskCardView(
-                  currentTask:
-                  sortedTasks[index],
+                child: InkWell(
+                  onLongPress: () => _longPressTaskCard(),
+                  child: TaskCardView(
+                    currentTask:
+                    sortedTasks[index],
+                  ),
                 ),
               );
             },
