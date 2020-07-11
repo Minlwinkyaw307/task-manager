@@ -49,6 +49,13 @@ class TaskProvider with ChangeNotifier {
 
   List<Task> _sortTask(List<Task> unsortedTask){
     unsortedTask.sort((a, b) => a.startDate.compareTo(b.startDate));
+    unsortedTask.sort((a, b) => ((b.startTime.hour * 60 + b.startTime.minute) - (a.startTime.hour * 60 + a.startTime.minute)));
+    unsortedTask.sort((a, b) {
+      int _a = a.pinned  ? 1 : 0;
+      int _b = b.pinned  ? 1 : 0;
+      return _b - _a;
+    });
+
     return unsortedTask;
   }
 

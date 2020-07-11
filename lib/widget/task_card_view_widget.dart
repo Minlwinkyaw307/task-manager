@@ -136,7 +136,8 @@ class TaskCardView extends StatelessWidget {
                         Container(
                           width: double.infinity,
                           child: Text(
-                            currentTask.title.toString(),
+                            "${currentTask.pinned ? '📌 ' : ""}${currentTask.title}",
+                            textAlign: TextAlign.justify,
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w600),
                           ),
@@ -219,7 +220,7 @@ class TaskCardView extends StatelessWidget {
                     },
                     child: Container(
                       child: Text(
-                        currentTask.status != 'DONE' ? "Done" : "Undone",
+                        currentTask.status == 'DONE' ? "Undone" : currentTask.status == 'CANCELED' ? "" : "Undone",
                         style: TextStyle(
                           color: Colors.black87,
                           fontWeight: FontWeight.bold,

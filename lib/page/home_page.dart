@@ -19,18 +19,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  GlobalKey _scaffoldKey = GlobalKey();
   PageController _pageController;
   TaskProvider _taskProvider;
   bool _shouldShowPie = false;
   int _currentPage = 0;
-
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
   }
-  Widget _topMenuBar(String title, int index){
+
+  Widget _topMenuBar(String title, int index) {
     bool active = index == _currentPage;
     double width = active ? 75 : 0;
 
@@ -53,14 +54,16 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            active ? Container(
-              margin: const EdgeInsets.only(
-                top: 7,
-              ),
-              width: width,
-              height: 3,
-              color: Colors.blue,
-            ) : Container(),
+            active
+                ? Container(
+                    margin: const EdgeInsets.only(
+                      top: 7,
+                    ),
+                    width: width,
+                    height: 3,
+                    color: Colors.blue,
+                  )
+                : Container(),
           ],
           mainAxisSize: MainAxisSize.min,
         ),
@@ -68,64 +71,88 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _bottomSheetOptionTile(String title, Color textColor, IconData icon, Color iconColor, Function onPress){
+  Widget _bottomSheetOptionTile(String title, Color textColor, IconData icon,
+      Color iconColor, Function onPress) {
     return GestureDetector(
       child: ListTile(
-        leading: Icon(icon,
+        leading: Icon(
+          icon,
           size: 27,
           color: iconColor,
         ),
-        title: Text(title,
+        title: Text(
+          title,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: textColor,
-          ),),
+          ),
+        ),
         onTap: () => onPress(),
       ),
     );
   }
 
-  void _longPressTaskCard(BuildContext context, Task task){
+  void _longPressTaskCard(BuildContext context, Task task) {
     vibrate(150, 50);
-    showModalBottomSheet(context: context, builder: (context){
-      return Container(
-        padding: const EdgeInsets.only(
-          bottom: 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _bottomSheetOptionTile("Edit Task", Colors.black87, Icons.edit, Colors.black54, (){
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed(TaskDetailEdit.ROUTE_NAME, arguments: task.id);
-            }),
-            _bottomSheetOptionTile("Delete Task", Colors.red, Icons.delete, Colors.red, (){
-              Navigator.of(context).pop();
-              confirmAlertDialog(
-                  context,
-                  'Confirm?',
-                  "Are you sure, you want to delete this task?",
-                      () {
-                        Navigator.of(context).pop();
-                      }, () {
-                _taskProvider.deleteByID(task).then((result) {
-                  if (result) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            padding: const EdgeInsets.only(
+              bottom: 20,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _bottomSheetOptionTile(
+                    task.pinned ? "Unpin from top" : "Pin on top", Colors.black54, Icons.fiber_pin, Colors.black54, () {
+                      print("PIN : ${task.pinned.toString()}");
+                      task.pinned = task.pinned ? false: true;
+                      print("PIN : ${task.pinned.toString()}");
+                      _taskProvider.updateTask(task);
+                  Navigator.of(context).pop();
+                }),
+                _bottomSheetOptionTile(
+                    "Edit", Colors.blue, Icons.edit, Colors.blue, () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context)
+                      .pushNamed(TaskDetailEdit.ROUTE_NAME, arguments: task.id);
+                }),
+                _bottomSheetOptionTile(
+                    task.status == "CANCELED" ? "Restore" : "Cancel",
+                    Colors.amber,
+                    task.status == "CANCELED" ? Icons.restore : Icons.cancel,
+                    Colors.amber, () {
+                      task.status = task.status == "CANCELED" ? "NEW" : "CANCELED";
+                      _taskProvider.updateTask(task);
+                  Navigator.of(context).pop();
+                  //Navigator.of(context).pushNamed(TaskDetailEdit.ROUTE_NAME, arguments: task.id);
+                }),
+                _bottomSheetOptionTile(
+                    "Delete", Colors.red, Icons.delete, Colors.red, () {
+                  confirmAlertDialog(_scaffoldKey.currentContext, 'Confirm?',
+                      "Are you sure, you want to delete this task?", () {
                     Navigator.of(context).pop();
-                  }
-                }).catchError((err) {
-                  print(
-                      "Getting Error while deleting a row(${task.id}) : ${err.toString()}");
-                });
-              });
-            }),
-          ],
-        ),
-      );
-    });
+                  }, () {
+                    _taskProvider.deleteByID(task).then((result) {
+                      if (result) {
+                        Navigator.of(context).pop();
+                      }
+                    }).catchError((err) {
+                      print(
+                          "Getting Error while deleting a row(${task.id}) : ${err.toString()}");
+                    });
+                  });
+                }),
+              ],
+            ),
+          );
+        });
   }
 
-  Widget _taskListPageView(BuildContext context, BoxConstraints constraints, List<Task> sortedTasks){
+  Widget _taskListPageView(BuildContext context, BoxConstraints constraints,
+      List<Task> sortedTasks) {
     return Container(
       width: constraints.maxWidth,
       height: constraints.maxHeight,
@@ -138,30 +165,31 @@ class _HomePageState extends State<HomePage> {
       child: SingleChildScrollView(
         child: Container(
           width: constraints.maxWidth,
-          height:
-          constraints.maxHeight * 0.95,
+          height: constraints.maxHeight * 0.95,
           margin: EdgeInsets.only(
             top: 10,
             bottom: 20,
           ),
           child: ListView.builder(
             itemCount: sortedTasks.length + 1,
-            itemBuilder:
-                (context, index) {
-              if(sortedTasks.length == index) return SizedBox(height: 60,);
+            itemBuilder: (context, index) {
+              if (sortedTasks.length == index)
+                return SizedBox(
+                  height: 60,
+                );
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                 ),
                 child: InkWell(
-                  onLongPress: () => _longPressTaskCard(context, sortedTasks[index]),
+                  onLongPress: () =>
+                      _longPressTaskCard(context, sortedTasks[index]),
                   onTap: () {
-                    Navigator.of(context)
-                        .pushNamed(TaskDetailEdit.ROUTE_NAME, arguments: sortedTasks[index].id);
+                    Navigator.of(context).pushNamed(TaskDetailEdit.ROUTE_NAME,
+                        arguments: sortedTasks[index].id);
                   },
                   child: TaskCardView(
-                    currentTask:
-                    sortedTasks[index],
+                    currentTask: sortedTasks[index],
                     provider: _taskProvider,
                   ),
                 ),
@@ -177,13 +205,17 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
     List<Task> currentTasks = [];
-    if(_currentPage == 0) currentTasks = _taskProvider.getTodayTasks();
-    else if(_currentPage == 1) currentTasks = _taskProvider.getThisWeekTasks();
-    else if(_currentPage == 2) currentTasks = _taskProvider.getThisMonthTasks();
-    else if(_currentPage == 3) currentTasks = _taskProvider.getAllTasks();
+    if (_currentPage == 0)
+      currentTasks = _taskProvider.getTodayTasks();
+    else if (_currentPage == 1)
+      currentTasks = _taskProvider.getThisWeekTasks();
+    else if (_currentPage == 2)
+      currentTasks = _taskProvider.getThisMonthTasks();
+    else if (_currentPage == 3) currentTasks = _taskProvider.getAllTasks();
 
     return SafeArea(
       child: Scaffold(
+          key: _scaffoldKey,
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               Navigator.of(context)
@@ -197,7 +229,10 @@ class _HomePageState extends State<HomePage> {
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                _shouldShowPie = (constraints.maxHeight / (PIE_ON_FOCUS_RADIUS * 2 +  PIE_MIDDLE_CIRCLE_RADIUS * 2) >= 4);
+                _shouldShowPie = (constraints.maxHeight /
+                        (PIE_ON_FOCUS_RADIUS * 2 +
+                            PIE_MIDDLE_CIRCLE_RADIUS * 2) >=
+                    4);
                 return Container(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -218,16 +253,23 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      _shouldShowPie ? Container(
-                        width: constraints.maxWidth,
-                        height: PIE_ON_FOCUS_RADIUS * 2 +  PIE_MIDDLE_CIRCLE_RADIUS * 2,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-                        child: PieChartWidget(tasks: currentTasks,)
+                      _shouldShowPie
+                          ? Container(
+                              width: constraints.maxWidth,
+                              height: PIE_ON_FOCUS_RADIUS * 2 +
+                                  PIE_MIDDLE_CIRCLE_RADIUS * 2,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: PieChartWidget(
+                                tasks: currentTasks,
+                              )
 
 //                    color: Colors.blue,
-                      ) : SizedBox(height: 20,),
+                              )
+                          : SizedBox(
+                              height: 20,
+                            ),
                       Expanded(
                         child: Container(
                           width: constraints.maxWidth,
@@ -236,7 +278,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                           child: Column(
                             children: <Widget>[
-                              NotificationListener<OverscrollIndicatorNotification>(
+                              NotificationListener<
+                                  OverscrollIndicatorNotification>(
                                 onNotification: (overscroll) {
                                   // ignore: missing_return
                                   overscroll.disallowGlow();
@@ -246,14 +289,21 @@ class _HomePageState extends State<HomePage> {
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: <Widget>[
                                       _topMenuBar('Today', 0),
-                                      SizedBox(width:20,),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
                                       _topMenuBar('Week', 1),
-                                      SizedBox(width:20,),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
                                       _topMenuBar('Month', 2),
-                                      SizedBox(width:20,),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
                                       _topMenuBar('All', 3),
                                     ],
                                   ),
@@ -274,10 +324,23 @@ class _HomePageState extends State<HomePage> {
                                           });
                                         },
                                         children: <Widget>[
-                                          _taskListPageView(context, constraints, _taskProvider.getTodayTasks()),
-                                          _taskListPageView(context, constraints, _taskProvider.getThisWeekTasks()),
-                                          _taskListPageView(context, constraints, _taskProvider.getThisMonthTasks()),
-                                          _taskListPageView(context, constraints, _taskProvider.getAllTasks()),
+                                          _taskListPageView(
+                                              context,
+                                              constraints,
+                                              _taskProvider.getTodayTasks()),
+                                          _taskListPageView(
+                                              context,
+                                              constraints,
+                                              _taskProvider.getThisWeekTasks()),
+                                          _taskListPageView(
+                                              context,
+                                              constraints,
+                                              _taskProvider
+                                                  .getThisMonthTasks()),
+                                          _taskListPageView(
+                                              context,
+                                              constraints,
+                                              _taskProvider.getAllTasks()),
                                         ],
                                       ),
                                     );
