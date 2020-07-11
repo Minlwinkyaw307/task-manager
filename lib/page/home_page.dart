@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/model/task_model.dart';
 import 'package:task_manager/page/task_detail_edit_page.dart';
@@ -24,6 +25,9 @@ class _HomePageState extends State<HomePage> {
   TaskProvider _taskProvider;
   bool _shouldShowPie = false;
   int _currentPage = 0;
+
+
+  bool _isMobile;
 
   @override
   void initState() {
@@ -171,18 +175,23 @@ class _HomePageState extends State<HomePage> {
             top: 10,
             bottom: 20,
           ),
-          child: ListView.builder(
+          child: StaggeredGridView.countBuilder(
+            crossAxisCount: 4,
             itemCount: sortedTasks.length + 1,
+            staggeredTileBuilder: (int index) =>
+              new StaggeredTile.fit(!_isMobile ? 4 : 2),
+            mainAxisSpacing: 4,
+            crossAxisSpacing: 4,
             itemBuilder: (context, index) {
               if (sortedTasks.length == index)
                 return SizedBox(
                   height: 60,
                 );
               return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                padding: EdgeInsets.symmetric(
+                  horizontal: !_isMobile ? 16 : 5,
                 ),
-                child: InkWell(
+                child: GestureDetector(
                   onLongPress: () =>
                       _longPressTaskCard(context, sortedTasks[index]),
                   onTap: () {
@@ -214,7 +223,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
-
+    var shortestSide = MediaQuery.of(context).size.shortestSide;
+    _isMobile = shortestSide < 600;
     List<Task> currentTasks = [];
     if (_currentPage == 0)
       currentTasks = _taskProvider.getTodayTasks();

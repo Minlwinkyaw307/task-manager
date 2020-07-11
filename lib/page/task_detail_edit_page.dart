@@ -483,7 +483,6 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                         ),
                                       ),
                                     ),
-
                                     Container(
                                       alignment: Alignment.centerLeft,
                                       padding: EdgeInsets.symmetric(
