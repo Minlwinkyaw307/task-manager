@@ -26,10 +26,12 @@ class ValueIndicator extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               color: Colors.black,
+              fontFamily: 'QuickSand'
             ),
             children: [
               TextSpan(
                 text: '${this.title} ',
+
               ),
               TextSpan(
                 text: '(${this.count.toString()})',

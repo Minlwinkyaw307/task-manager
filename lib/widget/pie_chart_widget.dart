@@ -29,6 +29,10 @@ class _PieChartWidgetState extends State<PieChartWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if(widget.tasks.length == 0) return SizedBox(
+      width: double.infinity,
+      height: 300,
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -64,6 +68,15 @@ class _PieChartWidgetState extends State<PieChartWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Container(
+                child: Text('Total ${widget.tasks.length} Task(s)', style: TextStyle(
+                  fontSize: 18,
+                ),),
+
+              ),
+              SizedBox(
+                height: 10,
+              ),
               ValueIndicator(color: NEW_COLOR, title: 'New', count: widget.newTaskCount,),
               SizedBox(
                 height: 10,
@@ -86,7 +99,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
     return List.generate(3, (i) {
       final isTouched = i == touchedIndex;
       final double fontSize = isTouched ? 25 : 16;
-      final double radius = isTouched ? PIE_ON_FOCUS_RADIUS : PIE_ON_FOCUS_RADIUS;
+      final double radius = isTouched ? PIE_ON_FOCUS_RADIUS : PIE_OUT_FOCUS_RADIUS;
       switch (i) {
         case 0:
           return PieChartSectionData(

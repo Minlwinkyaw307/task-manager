@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 _bottomSheetOptionTile(
-                    task.pinned ? "Unpin from top" : "Pin on top", Colors.black54, Icons.fiber_pin, Colors.black54, () {
+                    task.pinned ? "Unpin from top" : "Pin to top", Colors.black,task.pinned ? Icons.vertical_align_bottom : Icons.vertical_align_top, Colors.black, () {
                       print("PIN : ${task.pinned.toString()}");
                       task.pinned = task.pinned ? false: true;
                       print("PIN : ${task.pinned.toString()}");
@@ -137,6 +137,7 @@ class _HomePageState extends State<HomePage> {
                   }, () {
                     _taskProvider.deleteByID(task).then((result) {
                       if (result) {
+                        Navigator.of(context).pop();
                         Navigator.of(context).pop();
                       }
                     }).catchError((err) {
@@ -201,9 +202,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  String _getWelcomeMessage(){
+    String welcomeMessage = "";
+    TimeOfDay now = TimeOfDay.now();
+    if(now.hour >= 5 && now.hour <= 12) return 'Hello, Good Morning';
+    else if(now.hour > 12 && now.hour <= 5) return 'Hello, Good Afternoon';
+    return 'Hello, Good Evening';
+  }
+
+
   @override
   Widget build(BuildContext context) {
     this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
+
     List<Task> currentTasks = [];
     if (_currentPage == 0)
       currentTasks = _taskProvider.getTodayTasks();
@@ -246,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                           right: 16,
                         ),
                         child: Text(
-                          "Hi, Min Lwin",
+                          _getWelcomeMessage(),
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w600,

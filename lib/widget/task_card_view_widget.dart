@@ -20,57 +20,8 @@ class TaskCardView extends StatelessWidget {
     else if(this.currentTask.status == 'DONE') _bgColor = DONE_COLOR_SEC;
     else if(this.currentTask.status == 'CANCELED') _bgColor = CANCELED_COLOR_SEC;
 
-//    _bgColor = CANCELED_COLOR_SEC;
-
     final dateFormat = new DateFormat('dd.MM.yyyy');
-//    return Container(
-//      color: _bgColor,
-//      margin: EdgeInsets.only(
-//        bottom: 7,
-//      ),
-//      height: cartheight,
-//      child: Row(
-//        children: <Widget>[
-//          Container(
-//            height: cartheight,
-//            width: 5,
-//            color: _leftLineColor,
-//          ),
-//          SizedBox(
-//            width: 20,
-//          ),
-//          Expanded(
-//            child: Container(
-//              child: Column(
-//                crossAxisAlignment: CrossAxisAlignment.start,
-//                mainAxisAlignment: MainAxisAlignment.center,
-//                children: <Widget>[
-//                  Text(
-//                    dateFormat.format(currentTask.startDate),
-//                    style: TextStyle(
-//                        fontSize: 12, fontWeight: FontWeight.normal),
-//                  ),
-//                  Padding(
-//                    padding: const EdgeInsets.only(
-//                      bottom: 10
-//                    ),
-//                    child: Text(
-//                      currentTask.title,
-//                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-//                    ),
-//                  ),
-//                  Text(
-//                    currentTask.startTime.format(context) + " - " + currentTask.endTime.format(context),
-//                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black54),
-//                  ),
-//
-//                ],
-//              ),
-//            ),
-//          )
-//        ],
-//      ),
-//    );
+
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: 10,
@@ -82,14 +33,6 @@ class TaskCardView extends StatelessWidget {
       decoration: BoxDecoration(
           color: _bgColor,
           borderRadius: BorderRadius.circular(10),
-//          boxShadow: [
-//            BoxShadow(
-//              color: Colors.grey.withOpacity(0.35),
-//              spreadRadius: -7.5,
-//              blurRadius: 20,
-//              offset: Offset(0, 5),
-//            ),
-//          ],
       ),
       child: Column(
         children: <Widget>[
@@ -107,23 +50,6 @@ class TaskCardView extends StatelessWidget {
             ),
             child: Row(
               children: <Widget>[
-//                  Expanded(
-//                      flex: 3,
-//                      child: Padding(
-//                        padding: EdgeInsets.only(
-//                          left: 15,
-//                        ),
-//                        child: Align(
-//                          alignment: Alignment.centerLeft,
-//                          child: Container(
-//                            width: 15,
-//                            height: 15,
-//                            decoration: BoxDecoration(
-//                                color: DONE_COLOR,
-//                                borderRadius: BorderRadius.circular(100)),
-//                          ),
-//                        ),
-//                      )),
                 Expanded(
                   flex: 17,
                   child: Padding(
@@ -190,37 +116,25 @@ class TaskCardView extends StatelessWidget {
                     child: Text("${currentTask.startTime.format(context)} - ${currentTask.endTime.format(context)}"),
                   ),
                 ),
-//                  Expanded(
-//                    flex: 3,
-//                    child: Container(
-//                      child: Icon(
-//                        Icons
-//                            .mode_edit,
-//                        size: 25,
-//                        color: Colors.lightBlue,
-//                      ),
-//                    ),
-//                  ),
-                Expanded(
-                  flex: 6,
-                  child: GestureDetector(
-                    onTap: () {
-                      if(currentTask.status != 'DONE'){
-                        currentTask.status = "DONE";
-                      }else{
-                        currentTask.status = "NEW";
-                      }
-                      provider.updateTask(currentTask).then((result){
-                        if(result)print("Successfully Updated");
-                      }).catchError((err){
-                        print("Getting Error While Update status : ${err.toString()}");
-                      });
+                GestureDetector(
+                  onTap: () {
+                    if(currentTask.status != 'DONE'){
+                      currentTask.status = "DONE";
+                    }else{
+                      currentTask.status = "NEW";
+                    }
+                    provider.updateTask(currentTask).then((result){
+                      if(result)print("Successfully Updated");
+                    }).catchError((err){
+                      print("Getting Error While Update status : ${err.toString()}");
+                    });
 
-
-                    },
+                  },
+                  child: Expanded(
+                    flex: 6,
                     child: Container(
                       child: Text(
-                        currentTask.status == 'DONE' ? "Undone" : currentTask.status == 'CANCELED' ? "" : "Undone",
+                        currentTask.status == 'DONE' ? "UNDONE" : currentTask.status == 'CANCELED' ? "" : "DONE",
                         style: TextStyle(
                           color: Colors.black87,
                           fontWeight: FontWeight.bold,

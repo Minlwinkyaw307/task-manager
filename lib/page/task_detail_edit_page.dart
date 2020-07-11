@@ -490,7 +490,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                         vertical: 5,
                                       ),
                                       child: Text(
-                                        "Name",
+                                        "Title",
                                         style: TextStyle(
                                           fontSize: 14,
                                         ),
