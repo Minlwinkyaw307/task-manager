@@ -1,10 +1,24 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager/model/task_model.dart';
+import 'package:task_manager/widget/value_indicator.dart';
 
 import '../util/global_data.dart';
 
 class PieChartWidget extends StatefulWidget {
-  PieChartWidget();
+  List<Task> tasks;
+  int finishedTaskCount = 0;
+  int newTaskCount = 0;
+  int canceledTaskCount = 0;
+
+  PieChartWidget({@required this.tasks}){
+    this.tasks.forEach((element) {
+      if(element.status == "NEW") this.newTaskCount++;
+      else if(element.status == "DONE") this.finishedTaskCount++;
+      else if(element.status == "CANCELED") this.canceledTaskCount++;
+    });
+  }
+
 
   @override
   _PieChartWidgetState createState() => _PieChartWidgetState();
@@ -15,33 +29,60 @@ class _PieChartWidgetState extends State<PieChartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: PIE_ON_FOCUS_RADIUS * 2 +  PIE_MIDDLE_CIRCLE_RADIUS * 2,
-      child: PieChart(
-        PieChartData(
-          pieTouchData: PieTouchData(touchCallback: (pieTouchResponse) {
-            setState(() {
-              if (pieTouchResponse.touchInput is FlLongPressEnd ||
-                  pieTouchResponse.touchInput is FlPanEnd) {
-                touchedIndex = -1;
-              } else {
-                touchedIndex = pieTouchResponse.touchedSectionIndex;
-              }
-            });
-          }),
-          borderData: FlBorderData(
-            show: false,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Container(
+          width: PIE_ON_FOCUS_RADIUS * 2 +  PIE_MIDDLE_CIRCLE_RADIUS * 2,
+          child: PieChart(
+            PieChartData(
+              pieTouchData: PieTouchData(touchCallback: (pieTouchResponse) {
+                setState(() {
+                  if (pieTouchResponse.touchInput is FlLongPressEnd ||
+                      pieTouchResponse.touchInput is FlPanEnd) {
+                    touchedIndex = -1;
+                  } else {
+                    touchedIndex = pieTouchResponse.touchedSectionIndex;
+                  }
+                });
+              }),
+              borderData: FlBorderData(
+                show: false,
+              ),
+              startDegreeOffset: 30,
+              sectionsSpace: 3,
+              centerSpaceRadius: PIE_MIDDLE_CIRCLE_RADIUS,
+              sections: showingSections(),
+            ),
           ),
-          startDegreeOffset: 30,
-          sectionsSpace: 3,
-          centerSpaceRadius: PIE_MIDDLE_CIRCLE_RADIUS,
-          sections: showingSections(),
         ),
-      ),
+        SizedBox(width: 25,),
+        Expanded(
+          flex: 4,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ValueIndicator(color: NEW_COLOR, title: 'New', count: widget.newTaskCount,),
+              SizedBox(
+                height: 10,
+              ),
+              ValueIndicator(color: DONE_COLOR, title: 'Done', count: widget.finishedTaskCount,),
+              SizedBox(
+                height: 10,
+              ),
+              ValueIndicator(color: CANCELED_COLOR, title: 'Canceled', count: widget.canceledTaskCount,),
+
+            ],
+          ),
+        )
+      ],
     );
   }
 
   List<PieChartSectionData> showingSections() {
+
     return List.generate(3, (i) {
       final isTouched = i == touchedIndex;
       final double fontSize = isTouched ? 25 : 16;
@@ -50,17 +91,17 @@ class _PieChartWidgetState extends State<PieChartWidget> {
         case 0:
           return PieChartSectionData(
             color: DONE_COLOR,
-            value: 40,
-            title: '40%',
+            value: widget.finishedTaskCount.toDouble(),
+            title: widget.finishedTaskCount == 0 ? '' : '${(widget.finishedTaskCount/widget.tasks.length * 100).toStringAsFixed(0)}%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
           );
         case 1:
           return PieChartSectionData(
-            color: DOING_COLOR,
-            value: 30,
-            title: '30%',
+            color: NEW_COLOR,
+            value: widget.newTaskCount.toDouble(),
+            title: widget.newTaskCount == 0 ? '' : '${(widget.newTaskCount/widget.tasks.length * 100).toStringAsFixed(0)}%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
@@ -68,8 +109,8 @@ class _PieChartWidgetState extends State<PieChartWidget> {
         case 2:
           return PieChartSectionData(
             color: CANCELED_COLOR,
-            value: 15,
-            title: '15%',
+            value: widget.canceledTaskCount.toDouble(),
+            title: widget.canceledTaskCount == 0 ? '':  '${(widget.canceledTaskCount/widget.tasks.length * 100).toStringAsFixed(0)}%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),

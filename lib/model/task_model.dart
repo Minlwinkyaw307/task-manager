@@ -13,8 +13,8 @@ class Task {
   String _endDate;
   String _startTime;
   String _endTime;
-
   String status;
+  bool pinned;
 
   DateTime get startDate {
     return DateTime.parse(this._startDate);
@@ -38,13 +38,29 @@ class Task {
     return TimeOfDay.fromDateTime(format.parse(this._startTime));
   }
 
+  String get startTimeString{
+    return this._startTime;
+  }
+
   set startTime(TimeOfDay startTime){
     this._startTime = startTime.toString();
+  }
+
+  void setStartTime(String startTime){
+    this._startTime = startTime;
+  }
+
+  void setEndTime(String endTime){
+    this._endTime = endTime;
   }
 
   TimeOfDay get endTime{
     final format = DateFormat.jm();
     return TimeOfDay.fromDateTime(format.parse(this._endTime));
+  }
+
+  String get endTimeString{
+    return this._endTime;
   }
 
   set endTime(TimeOfDay startTime){
@@ -62,7 +78,8 @@ class Task {
     @required String endDate,
     @required String startTime,
     @required String endTime,
-    @required this.status
+    @required this.status,
+    @required this.pinned
   }) {
     this._startDate = startDate;
     this._endDate = endDate;
@@ -78,7 +95,8 @@ class Task {
         mapObj.containsKey('endDate') &&
         mapObj.containsKey('startTime') &&
         mapObj.containsKey('endTime') &&
-        mapObj.containsKey('status')) {
+        mapObj.containsKey('status') &&
+        mapObj.containsKey('pinned')) {
       this.id = mapObj['id'];
       this.title = mapObj['title'];
       this.description = mapObj['description'];
@@ -87,6 +105,7 @@ class Task {
       this._startTime = mapObj['startTime'];
       this._endTime = mapObj['endTime'];
       this.status = mapObj['status'];
+      this.pinned = mapObj['pinned'];
       database.execute(Task.createTableString()).then((_) {
         database.rawInsert(this.replaceDBString(), [
           this.id,
@@ -97,6 +116,7 @@ class Task {
           this._startTime,
           this._endTime,
           this.status,
+          this.pinned.toString(),
         ]);
       }).then((id) {
 //        this.id = id;
@@ -136,6 +156,7 @@ class Task {
       Database database) async {
     return await database.query(
       Task.tableName,
+      orderBy: 'pinned, startDate'
     );
   }
 
@@ -153,6 +174,7 @@ class Task {
         startTime: temp['startTime'],
         endTime: temp['endTime'],
         status: temp['status'],
+        pinned: temp['pinned'] == 'true',
       ));
     }
     return returnList;
@@ -167,11 +189,12 @@ class Task {
         'endDate DATE, '
         'startTime TEXT, '
         'endTime TEXT, '
-        'status TEXT)';
+        'status TEXT, '
+        'pinned BOOLEAN)';
   }
 
   String replaceDBString() {
-    return 'REPLACE INTO ${Task.tableName} (id, title, description, startDate, endDate, startTime, endTime, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    return 'REPLACE INTO ${Task.tableName} (id, title, description, startDate, endDate, startTime, endTime, status, pinned) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
   }
 
   static Future<bool> dropDB(Database database) async {
@@ -179,6 +202,17 @@ class Task {
       await database.rawQuery(Task.deleteTableString());
       return true;
     } catch (error) {
+      return false;
+    }
+  }
+  static Future<bool> deleteByID(Database database, int id) async {
+    try{
+      await database.rawQuery(
+        "DELETE FROM ${Task.tableName} WHERE id=${id}"
+      );
+      return true;
+    }catch (error) {
+      print("Getting error while deleting a row(${id.toString()}) : ${error.toString()}");
       return false;
     }
   }

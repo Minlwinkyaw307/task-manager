@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ValueIndicator extends StatelessWidget {
+  final String title;
+  final Color color;
+  final int count;
+
+  ValueIndicator({@required this.title, @required this.color, @required this.count});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -10,7 +16,7 @@ class ValueIndicator extends StatelessWidget {
         Container(
           width: 15,
           height: 15,
-          color: Colors.blue,
+          color: this.color,
         ),
         SizedBox(
           width: 10,
@@ -23,13 +29,10 @@ class ValueIndicator extends StatelessWidget {
             ),
             children: [
               TextSpan(
-                text: 'Done ',
+                text: '${this.title} ',
               ),
               TextSpan(
-                text: '(13)',
-                style: TextStyle(
-                  fontFamily: 'Quicksand',
-                ),
+                text: '(${this.count.toString()})',
               ),
             ],
           ),

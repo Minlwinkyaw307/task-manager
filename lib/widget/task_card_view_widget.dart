@@ -2,28 +2,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:task_manager/model/task_model.dart';
+import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/util/global_data.dart';
 
 class TaskCardView extends StatelessWidget {
   final Task currentTask;
+  final TaskProvider provider;
   Color _bgColor;
   Color _leftLineColor;
 
-  TaskCardView({@required this.currentTask});
+  TaskCardView({@required this.currentTask, @required this.provider});
 
   @override
   Widget build(BuildContext context) {
     double cardheight = 120;
-    if (this.currentTask.status == 'NEW') {
-      _bgColor = Colors.lightBlue[50];
-      _leftLineColor = Colors.lightBlue[300];
+    if (this.currentTask.status == 'NEW') _bgColor = NEW_COLOR_SEC;
+    else if(this.currentTask.status == 'DONE') _bgColor = DONE_COLOR_SEC;
+    else if(this.currentTask.status == 'CANCELED') _bgColor = CANCELED_COLOR_SEC;
 
-      _bgColor = Colors.yellow[50];
-      _leftLineColor = Colors.yellow[300];
-
-      _bgColor = Colors.red[50];
-      _leftLineColor = Colors.red[300];
-    }
+//    _bgColor = CANCELED_COLOR_SEC;
 
     final dateFormat = new DateFormat('dd.MM.yyyy');
 //    return Container(
@@ -83,16 +80,17 @@ class TaskCardView extends StatelessWidget {
         bottom: 15,
       ),
       decoration: BoxDecoration(
-          color: Color(0xFFF2D7D5),
+          color: _bgColor,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.35),
-              spreadRadius: -7.5,
-              blurRadius: 20,
-              offset: Offset(0, 5),
-            ),
-          ]),
+//          boxShadow: [
+//            BoxShadow(
+//              color: Colors.grey.withOpacity(0.35),
+//              spreadRadius: -7.5,
+//              blurRadius: 20,
+//              offset: Offset(0, 5),
+//            ),
+//          ],
+      ),
       child: Column(
         children: <Widget>[
           Container(
@@ -138,7 +136,7 @@ class TaskCardView extends StatelessWidget {
                         Container(
                           width: double.infinity,
                           child: Text(
-                            currentTask.title,
+                            currentTask.title.toString(),
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w600),
                           ),
@@ -163,7 +161,7 @@ class TaskCardView extends StatelessWidget {
                 vertical: 15,
               ),
               child: Text(
-                currentTask.description.toString(),
+                currentTask.description.split(' ').length > 25 ? currentTask.description.split(' ').sublist(0, 25).join(' ') + "..." : currentTask.description,
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal),
               ),
             ),
@@ -204,21 +202,38 @@ class TaskCardView extends StatelessWidget {
 //                  ),
                 Expanded(
                   flex: 6,
-                  child: Container(
-                    child: Text(
-                      "Done",
-                      style: TextStyle(
-                        color: CANCELED_COLOR,
-                        fontWeight: FontWeight.bold,
+                  child: GestureDetector(
+                    onTap: () {
+                      if(currentTask.status != 'DONE'){
+                        currentTask.status = "DONE";
+                      }else{
+                        currentTask.status = "NEW";
+                      }
+                      provider.updateTask(currentTask).then((result){
+                        if(result)print("Successfully Updated");
+                      }).catchError((err){
+                        print("Getting Error While Update status : ${err.toString()}");
+                      });
+
+
+                    },
+                    child: Container(
+                      child: Text(
+                        currentTask.status != 'DONE' ? "Done" : "Undone",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                        textAlign: TextAlign.end,
                       ),
-                      textAlign: TextAlign.end,
-                    ),
 //                      Icon(
 //                        Icons
 //                            .delete,
 //                        size: 25,
 //                        color: CANCELED_COLOR,
 //                      ),
+                    ),
                   ),
                 ),
               ],

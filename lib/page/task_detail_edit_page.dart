@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager/model/task_model.dart';
 import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/util/global_data.dart';
+import 'package:task_manager/util/global_method.dart';
 
 class TaskDetailEdit extends StatefulWidget {
   static const ROUTE_NAME = '/taskDetail/new_edit';
@@ -161,7 +162,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
         autofocus: false,
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
-        maxLines: 3,
+        maxLines: 5,
         style: TextStyle(),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -244,7 +245,25 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
           !isCreatingNewTask
               ? Expanded(
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      confirmAlertDialog(
+                          context,
+                          'Confirm?',
+                          "Are you sure, you want to delete this task?",
+                          () {
+                            Navigator.of(context).pop();
+                          }, () {
+                        _taskProvider.deleteByID(_currentTask).then((result) {
+                          if (result) {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          }
+                        }).catchError((err) {
+                          print(
+                              "Getting Error while deleting a row(${_currentTask.id}) : ${err.toString()}");
+                        });
+                      });
+                    },
                     child: Container(
                       child: Text(
                         "Delete",
@@ -278,25 +297,55 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                print("On tap Save");
+                _isNameValid = _inputValidation(
+                    value: _nameController.text, validCheck: _isNameValid);
+                _isDescriptionValid = _inputValidation(
+                    value: _descriptionController.text,
+                    validCheck: _isDescriptionValid);
                 if (isCreatingNewTask) {
-                  _isNameValid = _inputValidation(
-                      value: _nameController.text, validCheck: _isNameValid);
-                  _isDescriptionValid = _inputValidation(
-                      value: _descriptionController.text,
-                      validCheck: _isDescriptionValid);
                   if (_isNameValid && _isDescriptionValid) {
-                    if (_taskProvider.addNewTask(
-                        title: _nameController.text,
-                        description: _descriptionController.text,
-                        startDate: _taskStartDate.toString(),
-                        endDate: _taskEndDate.toString(),
-                        startTime: _taskStartTime.format(context),
-                        endTime: _taskEndTime.format(context),
-                        status: "NEW")) {
-                      Navigator.of(context).pop();
-                    }
-                    //Save Data
+                    _taskProvider
+                        .addNewTask(
+                      title: _nameController.text,
+                      description: _descriptionController.text,
+                      startDate: _taskStartDate.toString(),
+                      endDate: _taskEndDate.toString(),
+                      startTime: _taskStartTime.format(context),
+                      endTime: _taskEndTime.format(context),
+                      status: "NEW",
+                      pinned: false,
+                    )
+                        .then((result) {
+                      if (result) {
+                        Navigator.of(context).pop();
+                      }
+                    }).catchError((err) {
+                      print(
+                          "Getting Error While Adding New Task : ${err.toString()}");
+                    });
+                  }
+                } else {
+                  if (_isNameValid && _isDescriptionValid) {
+                    _currentTask.title = _nameController.text;
+                    _currentTask.description = _descriptionController.text;
+                    _currentTask.startDate = _taskStartDate != null
+                        ? _taskStartDate
+                        : _currentTask.startDate;
+                    _currentTask.endDate = _taskEndDate != null
+                        ? _taskEndDate
+                        : _currentTask.endDate;
+
+                    _currentTask.setStartTime(_taskStartTime.format(context));
+                    _currentTask.setEndTime(_taskEndTime.format(context));
+
+                    _taskProvider.updateTask(_currentTask).then((result) {
+                      if (result) {
+                        Navigator.of(context).pop();
+                      }
+                    }).catchError((err) {
+                      print(
+                          "Getting Error While Updating Task(${_currentTask.id}) : ${err.toString()}");
+                    });
                   }
                 }
               },
@@ -332,26 +381,35 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
 
   @override
   Widget build(BuildContext context) {
+    this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
     final dateFormat = new DateFormat('dd MMMM yyyy');
     final timeFormat = new DateFormat('HH:mm');
-    _taskEndTime = TimeOfDay.now();
-    if (_taskEndTime.hour + 1 >= 24)
-      _taskEndTime.replacing(
-        hour: 0,
-      );
-    else
-      _taskEndTime.replacing(
-        hour: _taskEndTime.hour + 1,
-      );
+
     unFocusInput();
     int id = ModalRoute.of(context).settings.arguments as int;
-    if (id != -1) {
+    if (id != -1 && _taskProvider.getTaskByID(id) != null) {
+      if (_currentTask == null) {
+        isCreatingNewTask = false;
+        this._currentTask = _taskProvider.getTaskByID(id);
+        _taskStartDate = this._currentTask.startDate;
+        _taskEndDate = this._currentTask.endDate;
+        _taskStartTime = this._currentTask.startTime;
+        _taskEndTime = this._currentTask.endTime;
+        _nameController.text = this._currentTask.title;
+        _descriptionController.text = this._currentTask.description;
+      }
+    } else
       isCreatingNewTask = true;
-      this._currentTask = _taskProvider.getTaskByID(id);
-      _taskStartDate = this._currentTask.startDate;
-      _taskEndDate = this._currentTask.endDate;
-      _taskStartTime = this._currentTask.startTime;
-      _taskEndTime = this._currentTask.endTime;
+    if (_taskEndTime == null) {
+      _taskEndTime = TimeOfDay.now();
+      if (_taskEndTime.hour + 1 >= 24)
+        _taskEndTime.replacing(
+          hour: 0,
+        );
+      else
+        _taskEndTime.replacing(
+          hour: _taskEndTime.hour + 1,
+        );
     }
     this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
 
@@ -396,7 +454,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                   vertical: 10,
                                 ),
                                 child: Text(
-                                  "Add Task",
+                                  isCreatingNewTask ? "Add Task" : "Edit Task",
                                   style: TextStyle(
                                     fontSize: 35,
                                     fontWeight: FontWeight.bold,
@@ -522,8 +580,14 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                   .then((date) {
                                                 setState(() {
                                                   _shouldFocus = true;
-                                                  if (date != null)
+                                                  if (date != null) {
                                                     this._taskStartDate = date;
+                                                    if (_taskStartDate.isAfter(
+                                                        _taskEndDate)) {
+                                                      _taskEndDate =
+                                                          _taskStartDate;
+                                                    }
+                                                  }
                                                 });
                                               });
                                             },
@@ -532,7 +596,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                           _detailListTile(
                                             'Start Time',
                                             _taskStartTime == null
-                                                ? "Not Setted"
+                                                ? "Not Set"
                                                 : _taskStartTime
                                                     .format(context),
                                             () {
@@ -567,7 +631,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                           _taskEndDate != null
                                                               ? _taskEndDate
                                                               : DateTime.now(),
-                                                      firstDate: DateTime.now(),
+                                                      firstDate: _taskEndDate,
                                                       lastDate: DateTime(3000))
                                                   .then((date) {
                                                 _shouldFocus = true;
@@ -582,7 +646,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                           _detailListTile(
                                             'End Time',
                                             _taskEndTime == null
-                                                ? "Not Setted"
+                                                ? "Not Set"
                                                 : _taskEndTime.format(context),
                                             () {
                                               showTimePicker(
@@ -595,20 +659,16 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                                 _shouldFocus = true;
                                                 setState(() {
                                                   if (time != null) {
-                                                    if (_taskStartDate.compareTo(
-                                                                _taskEndDate) ==
-                                                            0 &&
-                                                        (time.hour * 60 +
-                                                                time.minute) <
-                                                            (_taskStartTime
-                                                                        .hour *
-                                                                    60 +
-                                                                _taskStartDate
-                                                                    .minute)) {
+                                                    if ((time.hour * 60 +
+                                                            time.minute) <
+                                                        (_taskStartTime.hour *
+                                                                60 +
+                                                            _taskStartTime
+                                                                .minute)) {
                                                       _taskEndTime =
-                                                          TimeOfDay.now()
+                                                          _taskStartTime
                                                               .replacing(
-                                                        hour: TimeOfDay.now()
+                                                        hour: _taskStartTime
                                                                 .hour +
                                                             1,
                                                       );

@@ -27,6 +27,7 @@ class _MyAppState extends State<MyApp> {
     this.databaseManager.init().then((bool value) {
       if (value) {
         this._taskProvider.init();
+//        Task.dropDB(this.databaseManager.database);
       } else {
         throw Exception("Couldn't Start Database");
       }
