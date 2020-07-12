@@ -26,9 +26,3 @@ const Color INPUT_BG_COLOR = const Color(0xFFE9ECEE);
 const double PIE_ON_FOCUS_RADIUS = 75;
 const double PIE_OUT_FOCUS_RADIUS = 65;
 const double PIE_MIDDLE_CIRCLE_RADIUS = 10;
-
-//Done
-//Color(0xFFD4EFDF)
-
-//New
-//Color(0xFFD4E6F1)

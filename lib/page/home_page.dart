@@ -1,18 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
 import 'package:provider/provider.dart';
-import 'package:task_manager/model/task_model.dart';
-import 'package:task_manager/page/task_detail_edit_page.dart';
-import 'package:task_manager/provider/task_provider.dart';
-import 'package:task_manager/util/global_data.dart';
-import 'package:task_manager/util/global_method.dart';
-import 'package:task_manager/widget/pie_chart_widget.dart';
-import 'package:task_manager/widget/task_card_view_widget.dart';
-import 'package:task_manager/widget/value_indicator.dart';
-import 'package:vibration/vibration.dart';
+import 'package:task_manager/widget/task_list_page_view.dart';
+
+import '../model/task_model.dart';
+import '../page/task_detail_edit_page.dart';
+import '../provider/task_provider.dart';
+import '../util/global_data.dart';
+import '../widget/pie_chart_widget.dart';
 
 class HomePage extends StatefulWidget {
+  // Home Page route name
   static const ROUTE_NAME = '/';
 
   @override
@@ -20,13 +19,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  GlobalKey _scaffoldKey = GlobalKey();
+  //page view controller
   PageController _pageController;
+
+  //task provider to retrieve, update and add new task
   TaskProvider _taskProvider;
+
+  //check status of showing pie or not
   bool _shouldShowPie = false;
+
+  //current page index in page view
   int _currentPage = 0;
 
-
+  //to show mobile layout or tablet layout
   bool _isMobile;
 
   @override
@@ -35,6 +40,7 @@ class _HomePageState extends State<HomePage> {
     _pageController = PageController();
   }
 
+  //Top task date widget
   Widget _topMenuBar(String title, int index) {
     bool active = index == _currentPage;
     double width = active ? 75 : 0;
@@ -75,156 +81,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _bottomSheetOptionTile(String title, Color textColor, IconData icon,
-      Color iconColor, Function onPress) {
-    return GestureDetector(
-      child: ListTile(
-        leading: Icon(
-          icon,
-          size: 27,
-          color: iconColor,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: textColor,
-          ),
-        ),
-        onTap: () => onPress(),
-      ),
-    );
-  }
-
-  void _longPressTaskCard(BuildContext context, Task task) {
-    vibrate(150, 50);
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return Container(
-            padding: const EdgeInsets.only(
-              bottom: 20,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _bottomSheetOptionTile(
-                    task.pinned ? "Unpin from top" : "Pin to top", Colors.black,task.pinned ? Icons.vertical_align_bottom : Icons.vertical_align_top, Colors.black, () {
-                      print("PIN : ${task.pinned.toString()}");
-                      task.pinned = task.pinned ? false: true;
-                      print("PIN : ${task.pinned.toString()}");
-                      _taskProvider.updateTask(task);
-                  Navigator.of(context).pop();
-                }),
-                _bottomSheetOptionTile(
-                    "Edit", Colors.blue, Icons.edit, Colors.blue, () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context)
-                      .pushNamed(TaskDetailEdit.ROUTE_NAME, arguments: task.id);
-                }),
-                _bottomSheetOptionTile(
-                    task.status == "CANCELED" ? "Restore" : "Cancel",
-                    Colors.amber,
-                    task.status == "CANCELED" ? Icons.restore : Icons.cancel,
-                    Colors.amber, () {
-                      task.status = task.status == "CANCELED" ? "NEW" : "CANCELED";
-                      _taskProvider.updateTask(task);
-                  Navigator.of(context).pop();
-                  //Navigator.of(context).pushNamed(TaskDetailEdit.ROUTE_NAME, arguments: task.id);
-                }),
-                _bottomSheetOptionTile(
-                    "Delete", Colors.red, Icons.delete, Colors.red, () {
-                  confirmAlertDialog(_scaffoldKey.currentContext, 'Confirm?',
-                      "Are you sure, you want to delete this task?", () {
-                    Navigator.of(context).pop();
-                  }, () {
-                    _taskProvider.deleteByID(task).then((result) {
-                      if (result) {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      }
-                    }).catchError((err) {
-                      print(
-                          "Getting Error while deleting a row(${task.id}) : ${err.toString()}");
-                    });
-                  });
-                }),
-              ],
-            ),
-          );
-        });
-  }
-
-  Widget _taskListPageView(BuildContext context, BoxConstraints constraints,
-      List<Task> sortedTasks) {
-    return Container(
-      width: constraints.maxWidth,
-      height: constraints.maxHeight,
-      margin: const EdgeInsets.only(
-        top: 15,
-      ),
-//      padding: EdgeInsets.only(
-//        bottom: 50,
-//      ),
-      child: SingleChildScrollView(
-        child: Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight * 0.95,
-          margin: EdgeInsets.only(
-            top: 10,
-            bottom: 20,
-          ),
-          child: StaggeredGridView.countBuilder(
-            crossAxisCount: 4,
-            itemCount: sortedTasks.length + 1,
-            staggeredTileBuilder: (int index) =>
-              new StaggeredTile.fit(!_isMobile ? 4 : 2),
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-            itemBuilder: (context, index) {
-              if (sortedTasks.length == index)
-                return SizedBox(
-                  height: 60,
-                );
-              return Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: !_isMobile ? 16 : 5,
-                ),
-                child: GestureDetector(
-                  onLongPress: () =>
-                      _longPressTaskCard(context, sortedTasks[index]),
-                  onTap: () {
-                    Navigator.of(context).pushNamed(TaskDetailEdit.ROUTE_NAME,
-                        arguments: sortedTasks[index].id);
-                  },
-                  child: TaskCardView(
-                    currentTask: sortedTasks[index],
-                    provider: _taskProvider,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getWelcomeMessage(){
+  // get welcome message like morning, evening
+  String _getWelcomeMessage() {
     String welcomeMessage = "";
     TimeOfDay now = TimeOfDay.now();
-    if(now.hour >= 5 && now.hour <= 12) return 'Hello, Good Morning';
-    else if(now.hour > 12 && now.hour <= 5) return 'Hello, Good Afternoon';
+    if (now.hour >= 5 && now.hour <= 12)
+      return 'Hello, Good Morning';
+    else if (now.hour > 12 && now.hour <= 5) return 'Hello, Good Afternoon';
     return 'Hello, Good Evening';
   }
 
-
   @override
   Widget build(BuildContext context) {
+    //getting task provider
     this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
+
+    // checking device is mobile or tablet
     var shortestSide = MediaQuery.of(context).size.shortestSide;
     _isMobile = shortestSide < 600;
+
+    // getting current tasks to show them in pie chart
     List<Task> currentTasks = [];
     if (_currentPage == 0)
       currentTasks = _taskProvider.getTodayTasks();
@@ -236,147 +112,149 @@ class _HomePageState extends State<HomePage> {
 
     return SafeArea(
       child: Scaffold(
-          key: _scaffoldKey,
           floatingActionButton: FloatingActionButton(
             onPressed: () {
+              // route to add new task (id must be -1 to confirm new task or edit task)
               Navigator.of(context)
                   .pushNamed(TaskDetailEdit.ROUTE_NAME, arguments: -1);
             },
             child: Icon(Icons.add),
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 0,
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                _shouldShowPie = (constraints.maxHeight /
-                        (PIE_ON_FOCUS_RADIUS * 2 +
-                            PIE_MIDDLE_CIRCLE_RADIUS * 2) >=
-                    4);
-                return Container(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 20,
-                          bottom: 10,
-                          left: 16,
-                          right: 16,
-                        ),
-                        child: Text(
-                          _getWelcomeMessage(),
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w600,
-                          ),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              _shouldShowPie = (constraints.maxHeight /
+                      (PIE_ON_FOCUS_RADIUS * 2 +
+                          PIE_MIDDLE_CIRCLE_RADIUS * 2) >=
+                  4);
+              return Container(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 20,
+                        bottom: 10,
+                        left: 16,
+                        right: 16,
+                      ),
+                      child: Text(
+                        _getWelcomeMessage(),
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      _shouldShowPie
-                          ? Container(
-                              width: constraints.maxWidth,
-                              height: PIE_ON_FOCUS_RADIUS * 2 +
-                                  PIE_MIDDLE_CIRCLE_RADIUS * 2,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: PieChartWidget(
-                                tasks: currentTasks,
-                              )
+                    ),
+                    _shouldShowPie
+                        ? Container(
+                            width: constraints.maxWidth,
+                            height: PIE_ON_FOCUS_RADIUS * 2 +
+                                PIE_MIDDLE_CIRCLE_RADIUS * 2,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            child: PieChartWidget(
+                              tasks: currentTasks,
+                            )
 
 //                    color: Colors.blue,
-                              )
-                          : SizedBox(
-                              height: 20,
-                            ),
-                      Expanded(
-                        child: Container(
-                          width: constraints.maxWidth,
-                          padding: EdgeInsets.only(
-                            top: 15,
+                            )
+                        : SizedBox(
+                            height: 20,
                           ),
-                          child: Column(
-                            children: <Widget>[
-                              NotificationListener<
-                                  OverscrollIndicatorNotification>(
-                                onNotification: (overscroll) {
-                                  // ignore: missing_return
-                                  overscroll.disallowGlow();
-                                  return false;
-                                },
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      _topMenuBar('Today', 0),
-                                      SizedBox(
-                                        width: 20,
-                                      ),
-                                      _topMenuBar('Week', 1),
-                                      SizedBox(
-                                        width: 20,
-                                      ),
-                                      _topMenuBar('Month', 2),
-                                      SizedBox(
-                                        width: 20,
-                                      ),
-                                      _topMenuBar('All', 3),
-                                    ],
-                                  ),
+                    Expanded(
+                      child: Container(
+                        width: constraints.maxWidth,
+                        padding: EdgeInsets.only(
+                          top: 15,
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            NotificationListener<
+                                OverscrollIndicatorNotification>(
+                              onNotification: (overscroll) {
+                                // ignore: missing_return
+                                overscroll.disallowGlow();
+                                return false;
+                              },
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    _topMenuBar('Today', 0),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    _topMenuBar('Week', 1),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    _topMenuBar('Month', 2),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    _topMenuBar('All', 3),
+                                  ],
                                 ),
                               ),
-                              Expanded(
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return Container(
-                                      width: constraints.maxWidth,
-                                      height: constraints.maxHeight,
-                                      child: PageView(
-                                        controller: _pageController,
-                                        scrollDirection: Axis.horizontal,
-                                        onPageChanged: (pageNo) {
-                                          setState(() {
-                                            _currentPage = pageNo;
-                                          });
-                                        },
-                                        children: <Widget>[
-                                          _taskListPageView(
-                                              context,
-                                              constraints,
-                                              _taskProvider.getTodayTasks()),
-                                          _taskListPageView(
-                                              context,
-                                              constraints,
-                                              _taskProvider.getThisWeekTasks()),
-                                          _taskListPageView(
-                                              context,
-                                              constraints,
-                                              _taskProvider
-                                                  .getThisMonthTasks()),
-                                          _taskListPageView(
-                                              context,
-                                              constraints,
-                                              _taskProvider.getAllTasks()),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
-                            ],
-                          ),
+                            ),
+                            Expanded(
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return Container(
+                                    width: constraints.maxWidth,
+                                    height: constraints.maxHeight,
+                                    child: PageView(
+                                      controller: _pageController,
+                                      scrollDirection: Axis.horizontal,
+                                      onPageChanged: (pageNo) {
+                                        setState(() {
+                                          _currentPage = pageNo;
+                                        });
+                                      },
+                                      children: <Widget>[
+                                        TaskListPageView(
+                                          constraints: constraints,
+                                          isMobile: _isMobile,
+                                          sortedTasks: _taskProvider.getTodayTasks(),
+                                          taskProvider: _taskProvider,
+                                        ),
+                                        TaskListPageView(
+                                          constraints: constraints,
+                                          isMobile: _isMobile,
+                                          sortedTasks: _taskProvider.getThisWeekTasks(),
+                                          taskProvider: _taskProvider,
+                                        ),
+                                        TaskListPageView(
+                                          constraints: constraints,
+                                          isMobile: _isMobile,
+                                          sortedTasks: _taskProvider.getThisMonthTasks(),
+                                          taskProvider: _taskProvider,
+                                        ),
+                                        TaskListPageView(
+                                          constraints: constraints,
+                                          isMobile: _isMobile,
+                                          sortedTasks: _taskProvider.getAllTasks(),
+                                          taskProvider: _taskProvider,
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                  ],
+                ),
+              );
+            },
           )),
     );
   }

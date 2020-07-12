@@ -15,68 +15,33 @@ class TaskDetailEdit extends StatefulWidget {
 }
 
 class _TaskDetailEditState extends State<TaskDetailEdit> {
+  // task provider
   TaskProvider _taskProvider;
+  // current task that is currently creating or updating
   Task _currentTask;
+  // task's start date
   DateTime _taskStartDate = DateTime.now();
+  // task's end date
   DateTime _taskEndDate = DateTime.now().add(Duration(days: 1));
+  // task's start time
   TimeOfDay _taskStartTime = TimeOfDay.now();
+  // task's end time
   TimeOfDay _taskEndTime;
 
-  var _nameController = TextEditingController();
-  final FocusNode _nameFocus = FocusNode();
-  bool _isNameValid = true;
+  // title's controller, focus node and validation status
+  var _titleController = TextEditingController();
+  final FocusNode _titleFocus = FocusNode();
+  bool _isTitleValid = true;
 
-  bool _shouldFocus = false;
-
+  // description's controller, focus node and validation status
   var _descriptionController = TextEditingController();
   final FocusNode _descriptionFocus = FocusNode();
   bool _isDescriptionValid = true;
 
+  // whether focus on input or not when page was refresh
+  bool _shouldFocus = false;
+  // status of creating new task or editing in current page
   bool isCreatingNewTask = true;
-
-  Widget _customAppBar() {
-    return Container(
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: Container(
-              height: 50,
-              padding: EdgeInsets.symmetric(
-                horizontal: 12,
-              ),
-              alignment: Alignment.centerLeft,
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.black,
-                size: 27,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 8,
-            child: Container(),
-          ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              height: 50,
-              padding: EdgeInsets.symmetric(
-                horizontal: 16,
-              ),
-              alignment: Alignment.centerRight,
-              child: Icon(
-                Icons.check,
-                color: Colors.black,
-                size: 27,
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
 
   Widget _inputTextField({
     @required TextEditingController controller,
@@ -84,6 +49,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     @required Function validation,
     @required bool validCheck,
   }) {
+    // should not make it to widget class
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: 3,
@@ -114,8 +80,9 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
   }
 
   void unFocusInput() {
+    // unfocusing the inputs when user update date and time
     if (!_shouldFocus) return;
-    _nameFocus.unfocus();
+    _titleFocus.unfocus();
     _descriptionFocus.unfocus();
     // ignore: unnecessary_statements
     _shouldFocus = false;
@@ -126,11 +93,13 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     @required bool validCheck,
     FocusNode focusNode,
   }) {
+    // should not make it to widget class
+    // form validation for title and description
     setState(() {
       if (value.length == 0 || value.replaceAll(' ', '').length == 0) {
         validCheck = false;
         print("Not Valid" +
-            _isNameValid.toString() +
+            _isTitleValid.toString() +
             " " +
             _isDescriptionValid.toString());
       } else {
@@ -231,6 +200,8 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
     );
   }
 
+  // bottom button is a widget base on current page condition it will render
+  // save button or (update and delete) buttons with different functionalities
   Widget _bottomButtons(BuildContext context, double height, double width) {
     return Container(
       height: height,
@@ -297,16 +268,16 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                _isNameValid = _inputValidation(
-                    value: _nameController.text, validCheck: _isNameValid);
+                _isTitleValid = _inputValidation(
+                    value: _titleController.text, validCheck: _isTitleValid);
                 _isDescriptionValid = _inputValidation(
                     value: _descriptionController.text,
                     validCheck: _isDescriptionValid);
                 if (isCreatingNewTask) {
-                  if (_isNameValid && _isDescriptionValid) {
+                  if (_isTitleValid && _isDescriptionValid) {
                     _taskProvider
                         .addNewTask(
-                      title: _nameController.text,
+                      title: _titleController.text,
                       description: _descriptionController.text,
                       startDate: _taskStartDate.toString(),
                       endDate: _taskEndDate.toString(),
@@ -325,8 +296,8 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                     });
                   }
                 } else {
-                  if (_isNameValid && _isDescriptionValid) {
-                    _currentTask.title = _nameController.text;
+                  if (_isTitleValid && _isDescriptionValid) {
+                    _currentTask.title = _titleController.text;
                     _currentTask.description = _descriptionController.text;
                     _currentTask.startDate = _taskStartDate != null
                         ? _taskStartDate
@@ -381,12 +352,12 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
 
   @override
   Widget build(BuildContext context) {
-    this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
-    final dateFormat = new DateFormat('dd MMMM yyyy');
-    final timeFormat = new DateFormat('HH:mm');
+    // task provider (no need to render again)
+    this._taskProvider = Provider.of<TaskProvider>(context, listen: false);
 
-    unFocusInput();
+    // retrieving id value that was passed from home page to get task
     int id = ModalRoute.of(context).settings.arguments as int;
+    // base on id getting task or creating empty task
     if (id != -1 && _taskProvider.getTaskByID(id) != null) {
       if (_currentTask == null) {
         isCreatingNewTask = false;
@@ -395,7 +366,7 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
         _taskEndDate = this._currentTask.endDate;
         _taskStartTime = this._currentTask.startTime;
         _taskEndTime = this._currentTask.endTime;
-        _nameController.text = this._currentTask.title;
+        _titleController.text = this._currentTask.title;
         _descriptionController.text = this._currentTask.description;
       }
     } else
@@ -411,8 +382,12 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
           hour: _taskEndTime.hour + 1,
         );
     }
-    this._taskProvider = Provider.of<TaskProvider>(context, listen: true);
 
+    final dateFormat = new DateFormat('dd MMMM yyyy');
+    // unfocusing input
+    unFocusInput();
+
+    // should show save button or not (when user open keyboard to type title and description)
     bool isKeyBoardOn = MediaQuery.of(context).viewInsets.bottom != 0;
     return SafeArea(
       child: Scaffold(
@@ -496,10 +471,10 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                       ),
                                     ),
                                     _inputTextField(
-                                        controller: _nameController,
-                                        focusNode: _nameFocus,
+                                        controller: _titleController,
+                                        focusNode: _titleFocus,
                                         validation: _inputValidation,
-                                        validCheck: _isNameValid),
+                                        validCheck: _isTitleValid),
                                     SizedBox(
                                       height: 10,
                                     ),
@@ -517,12 +492,6 @@ class _TaskDetailEditState extends State<TaskDetailEdit> {
                                               fontSize: 14,
                                             ),
                                           ),
-                                          true
-                                              ? SizedBox()
-                                              : Text(
-                                                  "(ကွက်လပ်အဖြစ်ထားခဲ့လို့မရပါ)",
-                                                  style: TextStyle(),
-                                                ),
                                         ],
                                       ),
                                     ),

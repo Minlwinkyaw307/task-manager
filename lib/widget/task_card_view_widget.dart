@@ -2,14 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:task_manager/model/task_model.dart';
+import 'package:task_manager/page/task_detail_edit_page.dart';
 import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/util/global_data.dart';
 
+// ignore: must_be_immutable
+// One singel task card view
 class TaskCardView extends StatelessWidget {
   final Task currentTask;
   final TaskProvider provider;
   Color _bgColor;
-  Color _leftLineColor;
 
   TaskCardView({@required this.currentTask, @required this.provider});
 
@@ -23,22 +25,6 @@ class TaskCardView extends StatelessWidget {
       _bgColor = CANCELED_COLOR_SEC;
 
     final dateFormat = new DateFormat('dd.MM.yyyy');
-//        return Container(
-//      width: double.infinity,
-//      height: 100,
-//      color: Colors.blue,
-//      child: Material(
-//        color: Colors.transparent,
-//        child: Ink(
-//          decoration: BoxDecoration(
-//            // ...
-//          ),
-//          child: InkWell(
-//            onTap: () {}, //other widget
-//          ),
-//        ),
-//      ),
-//    );
 
     return Container(
       margin: EdgeInsets.only(
@@ -58,7 +44,10 @@ class TaskCardView extends StatelessWidget {
             shadowColor: Colors.grey[50],
             child: Ink(
               child: InkWell(
-                onTap: (){},
+                onTap: (){
+                  Navigator.of(context).pushNamed(TaskDetailEdit.ROUTE_NAME,
+                      arguments: currentTask.id);
+                },
                 child: Wrap(
                   children: <Widget>[
                     Container(
