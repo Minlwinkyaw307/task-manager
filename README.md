@@ -21,8 +21,9 @@ There are only 2 pages in the application. Home page is where all the tasks of t
 For mobile, on top of the page there is a pie chart to display how many tasks were finished, canceled and newly created. Pie chart data will be changing every time user select different list (today, week, or month). Base on display type and tablet pie chart might not display on top of the page. 
 
 
-|  ![Home Page Mobile View](https://res.cloudinary.com/minlwinkyaw/image/upload/v1594537485/minlwinkyaw/task_manager/mobile_1_muofwj.jpg =250x)|   ![Home Page Tablet View](https://res.cloudinary.com/minlwinkyaw/image/upload/v1594537408/minlwinkyaw/task_manager/tablet_1_pmgjft.png =320x) |
-|--|--|
+![Home Page Mobile View](https://res.cloudinary.com/minlwinkyaw/image/upload/c_scale,w_500/v1594537485/minlwinkyaw/task_manager/mobile_1_muofwj.jpg)
+![Home Page Tablet View](https://res.cloudinary.com/minlwinkyaw/image/upload/c_scale,w_500/v1594537408/minlwinkyaw/task_manager/tablet_1_pmgjft.png)
+
 
 After that there is a tab bar to switch page (page view's page) to check out today, weekly, monthly or all of the tasks. 
 If user is using from tablet, the way of showing these task card will be different from mobile view.
@@ -34,13 +35,14 @@ If user long press on task card, it will pop up options for selected task. There
  3. Cancelling the task or restoring the task
  4. Deleting the task from the list (won't be recovered)
  
- ![Options in Mobile View](https://res.cloudinary.com/minlwinkyaw/image/upload/v1594538191/minlwinkyaw/task_manager/mobile_2_x1efyj.jpg =250x)|   ![Options in Tablet View](https://res.cloudinary.com/minlwinkyaw/image/upload/v1594538190/minlwinkyaw/task_manager/tablet_3_ak0qkh.png =320x) |
-|--|--|
+![Options in Mobile View](https://res.cloudinary.com/minlwinkyaw/image/upload/c_scale,w_500/v1594538191/minlwinkyaw/task_manager/mobile_2_x1efyj.jpg)
+![Options in Tablet View](https://res.cloudinary.com/minlwinkyaw/image/upload/c_scale,w_500/v1594538190/minlwinkyaw/task_manager/tablet_3_ak0qkh.png)
+
 
 ## Add or Update Task Page
 
 This page will be redirected when user select task that was already created as update page and it will allow user to update information of the task.
 If user tap on add floating button from home page, it will work as adding new task.
 
-![Adding task in mobile view](https://res.cloudinary.com/minlwinkyaw/image/upload/v1594538699/minlwinkyaw/task_manager/mobile_3_jxgfya.jpg =250x)| ![Updating task in tablet view](https://res.cloudinary.com/minlwinkyaw/image/upload/v1594537408/minlwinkyaw/task_manager/tablet_2_w2iqms.png =320x) |
-|--|--|
+![Adding task in mobile view](https://res.cloudinary.com/minlwinkyaw/image/upload/c_scale,w_500/v1594538699/minlwinkyaw/task_manager/mobile_3_jxgfya.jpg)
+![Updating task in tablet view](https://res.cloudinary.com/minlwinkyaw/image/upload/c_scale,w_500/v1594537408/minlwinkyaw/task_manager/tablet_2_w2iqms.png)
