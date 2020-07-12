@@ -34,7 +34,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
   Widget build(BuildContext context) {
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Container(
           width: PIE_ON_FOCUS_RADIUS * 2 +  PIE_MIDDLE_CIRCLE_RADIUS * 2,
@@ -61,34 +61,31 @@ class _PieChartWidgetState extends State<PieChartWidget> {
           ),
         ),
         SizedBox(width: 25,),
-        Expanded(
-          flex: 4,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                child: Text('Total ${widget.tasks.length} Task${widget.tasks.length > 1 ? 's' : ''}', style: TextStyle(
-                  fontSize: 18,
-                ),),
+        Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              child: Text('Total ${widget.tasks.length} Task${widget.tasks.length > 1 ? 's' : ''}', style: TextStyle(
+                fontSize: 18,
+              ),),
 
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              ValueIndicator(color: NEW_COLOR, title: 'New', count: widget.newTaskCount,),
-              SizedBox(
-                height: 10,
-              ),
-              ValueIndicator(color: DONE_COLOR, title: 'Done', count: widget.finishedTaskCount,),
-              SizedBox(
-                height: 10,
-              ),
-              ValueIndicator(color: CANCELED_COLOR, title: 'Canceled', count: widget.canceledTaskCount,),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            ValueIndicator(color: NEW_COLOR, title: 'New', count: widget.newTaskCount,),
+            SizedBox(
+              height: 10,
+            ),
+            ValueIndicator(color: DONE_COLOR, title: 'Done', count: widget.finishedTaskCount,),
+            SizedBox(
+              height: 10,
+            ),
+            ValueIndicator(color: CANCELED_COLOR, title: 'Canceled', count: widget.canceledTaskCount,),
 
-            ],
-          ),
+          ],
         )
       ],
     );

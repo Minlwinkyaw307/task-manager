@@ -217,29 +217,49 @@ class _HomePageState extends State<HomePage> {
                                         });
                                       },
                                       children: <Widget>[
-                                        TaskListPageView(
-                                          constraints: constraints,
-                                          isMobile: _isMobile,
-                                          sortedTasks: _taskProvider.getTodayTasks(),
-                                          taskProvider: _taskProvider,
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: this._isMobile ? 0 : 16,
+                                          ),
+                                          child: TaskListPageView(
+                                            constraints: constraints,
+                                            isMobile: _isMobile,
+                                            sortedTasks: _taskProvider.getTodayTasks(),
+                                            taskProvider: _taskProvider,
+                                          ),
                                         ),
-                                        TaskListPageView(
-                                          constraints: constraints,
-                                          isMobile: _isMobile,
-                                          sortedTasks: _taskProvider.getThisWeekTasks(),
-                                          taskProvider: _taskProvider,
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: this._isMobile ? 0 : 16,
+                                          ),
+                                          child: TaskListPageView(
+                                            constraints: constraints,
+                                            isMobile: _isMobile,
+                                            sortedTasks: _taskProvider.getThisWeekTasks(),
+                                            taskProvider: _taskProvider,
+                                          ),
                                         ),
-                                        TaskListPageView(
-                                          constraints: constraints,
-                                          isMobile: _isMobile,
-                                          sortedTasks: _taskProvider.getThisMonthTasks(),
-                                          taskProvider: _taskProvider,
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: this._isMobile ? 0 : 16,
+                                          ),
+                                          child: TaskListPageView(
+                                            constraints: constraints,
+                                            isMobile: _isMobile,
+                                            sortedTasks: _taskProvider.getThisMonthTasks(),
+                                            taskProvider: _taskProvider,
+                                          ),
                                         ),
-                                        TaskListPageView(
-                                          constraints: constraints,
-                                          isMobile: _isMobile,
-                                          sortedTasks: _taskProvider.getAllTasks(),
-                                          taskProvider: _taskProvider,
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: this._isMobile ? 0 : 16,
+                                          ),
+                                          child: TaskListPageView(
+                                            constraints: constraints,
+                                            isMobile: _isMobile,
+                                            sortedTasks: _taskProvider.getAllTasks(),
+                                            taskProvider: _taskProvider,
+                                          ),
                                         ),
                                       ],
                                     ),

@@ -1,4 +1,3 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseManager{
@@ -7,7 +6,6 @@ class DatabaseManager{
   String dbFileName;
   String dbPath;
   int dbVersion;
-  SharedPreferences preferences;
 
   DatabaseManager({
     this.dbBasePath,
